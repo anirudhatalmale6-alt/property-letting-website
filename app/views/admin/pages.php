@@ -29,11 +29,17 @@
               </div>
               <div class="table__sub"><?= e(excerpt($page['body'], 90)) ?></div>
             </td>
-            <td class="text-small text-soft">/<?= e($page['slug']) ?></td>
+            <td class="text-small text-soft">
+              <?= $page['slug'] === 'fees-notes' ? 'under the fee table on /pricing' : '/' . e($page['slug']) ?>
+            </td>
             <td class="text-small text-soft nowrap"><?= e(pretty_datetime($page['updated_at'])) ?></td>
             <td class="table__actions">
               <a class="btn btn--ghost btn--small" href="<?= e(url('/admin/pages/' . $page['slug'])) ?>">Edit</a>
-              <a class="btn btn--ghost btn--small" href="<?= e(url('/' . $page['slug'])) ?>" target="_blank" rel="noopener">View</a>
+              <?php if (in_array($page['slug'], ['about', 'privacy', 'terms'], true)): ?>
+                <a class="btn btn--ghost btn--small" href="<?= e(url('/' . $page['slug'])) ?>" target="_blank" rel="noopener">View</a>
+              <?php elseif ($page['slug'] === 'fees-notes'): ?>
+                <a class="btn btn--ghost btn--small" href="<?= e(url('/pricing')) ?>" target="_blank" rel="noopener">View</a>
+              <?php endif; ?>
             </td>
           </tr>
         <?php endforeach; ?>

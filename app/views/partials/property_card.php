@@ -44,7 +44,7 @@ $statusLabel = LETTING_STATUSES[$card['letting_status']] ?? '';
     </div>
 
     <div class="card__foot">
-      <span class="price"><?= e(money((int)$card['price_pcm'])) ?> <span>pcm</span></span>
+      <span class="price"><?= e(money((int)$card['price_pcm'])) ?> <span><?= e(rent_period()) ?></span></span>
       <a href="<?= e(url('/property/' . $card['slug'])) ?>">View details</a>
     </div>
   </div>

@@ -81,7 +81,7 @@
                   &middot; <?= (int)$p['image_count'] ?> photo<?= (int)$p['image_count'] === 1 ? '' : 's' ?>
                 </div>
               </td>
-              <td class="nowrap"><?= e(money((int)$p['price_pcm'])) ?> <span class="text-small text-soft">pcm</span></td>
+              <td class="nowrap"><?= e(money((int)$p['price_pcm'])) ?> <span class="text-small text-soft"><?= e(rent_period()) ?></span></td>
               <td><?= (int)$p['bedrooms'] ?></td>
               <td>
                 <?php if ($p['is_archived']): ?>

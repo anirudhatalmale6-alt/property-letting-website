@@ -7,6 +7,7 @@ $groups = [
     'Home page'       => ['hero_heading', 'hero_subheading', 'home_intro_heading', 'home_intro_body'],
     'Contact details' => ['contact_email', 'contact_phone', 'contact_address', 'office_hours', 'contact_intro', 'map_embed'],
     'Enquiries'       => ['enquiry_notify_email'],
+    'Prices'          => ['currency_symbol', 'rent_period_label'],
     'Appearance'      => ['primary_colour', 'theme_accent', 'footer_note'],
 ];
 ?>
@@ -21,8 +22,42 @@ $groups = [
   </div>
 </div>
 
-<form method="post" action="<?= e(url('/admin/settings')) ?>" data-dirty-warn>
+<form method="post" action="<?= e(url('/admin/settings')) ?>" enctype="multipart/form-data" data-dirty-warn>
   <?= csrf_field() ?>
+
+  <div class="panel">
+    <div class="panel__head">
+      <h2>Logo</h2>
+      <p>Shown in the header next to your business name.</p>
+    </div>
+
+    <?php $logo = logo_url(); ?>
+    <?php if ($logo !== ''): ?>
+      <div style="background: #f3f6fa; border: 1px solid var(--adm-line); border-radius: var(--adm-radius-sm);
+                  padding: 18px; margin-bottom: 16px; display: inline-block;">
+        <img src="<?= e($logo) ?>" alt="Current logo" style="max-height: 80px; width: auto;">
+      </div>
+      <?php if (setting('logo_file') === ''): ?>
+        <p class="field__hint" style="margin-top: 0;">This is the logo supplied at build time. Upload a new file below to replace it.</p>
+      <?php endif; ?>
+    <?php endif; ?>
+
+    <div class="field">
+      <label for="logo">Upload a new logo</label>
+      <input type="file" id="logo" name="logo" accept="image/png,image/jpeg,image/webp">
+      <p class="field__hint">
+        A PNG with a transparent background works best. Wide, short artwork suits a header —
+        anything taller than it is wide will look small next to the text.
+      </p>
+    </div>
+
+    <?php if (setting('logo_file') !== ''): ?>
+      <div class="checkbox">
+        <input type="checkbox" id="remove_logo" name="remove_logo" value="1">
+        <label for="remove_logo">Remove the logo and show just the business name</label>
+      </div>
+    <?php endif; ?>
+  </div>
 
   <?php foreach ($groups as $groupName => $keys): ?>
     <div class="panel">

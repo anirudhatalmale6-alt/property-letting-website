@@ -98,13 +98,13 @@ $action = $isNew ? url('/admin/properties/new') : url('/admin/properties/' . $pr
 
     <div class="grid-4">
       <div class="field<?= isset($errors['price_pcm']) ? ' field--invalid' : '' ?>">
-        <label for="price_pcm">Rent per month (£)</label>
+        <label for="price_pcm">Rent per month (<?= e(setting('currency_symbol', '£')) ?>)</label>
         <input type="number" id="price_pcm" name="price_pcm" value="<?= e($val('price_pcm')) ?>" min="0" step="1" required>
         <?php if (isset($errors['price_pcm'])): ?><p class="field__error"><?= e($errors['price_pcm']) ?></p><?php endif; ?>
       </div>
 
       <div class="field">
-        <label for="deposit">Deposit (£)</label>
+        <label for="deposit">Deposit (<?= e(setting('currency_symbol', '£')) ?>)</label>
         <input type="number" id="deposit" name="deposit" value="<?= e($val('deposit')) ?>" min="0" step="1">
         <p class="field__hint">Capped at five weeks' rent.</p>
       </div>

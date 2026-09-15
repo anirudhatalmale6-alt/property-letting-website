@@ -42,23 +42,18 @@
         </table>
       </div>
 
-      <div class="prose mt-32">
-        <h2>How the money works</h2>
-        <p>
-          A holding deposit reserves the property while we reference you. If the tenancy goes ahead it
-          comes off your first month's rent. If we cannot proceed for a reason that is not your fault,
-          it is returned in full.
-        </p>
-        <p>
-          Your tenancy deposit is protected in a government-approved scheme within 30 days of receipt,
-          and you will be given the scheme's prescribed information in writing. At the end of the tenancy
-          it is returned less any deductions that have been agreed or determined by the scheme's adjudicator.
-        </p>
-        <p>
-          If anything on this page is unclear, ask us before you commit to anything —
-          <a href="<?= e(url('/contact')) ?>">get in touch</a> and we will talk it through.
-        </p>
-      </div>
+      <?php $notes = page('fees-notes'); ?>
+      <?php if ($notes && trim($notes['body']) !== ''): ?>
+        <div class="prose mt-32">
+          <h2><?= e($notes['title']) ?></h2>
+          <?= paragraphs($notes['body']) ?>
+        </div>
+      <?php endif; ?>
+
+      <p class="text-small text-soft mt-32">
+        If anything on this page is unclear, ask us before you commit to anything —
+        <a href="<?= e(url('/contact')) ?>">get in touch</a> and we will talk it through.
+      </p>
     <?php endif; ?>
   </div>
 </section>

@@ -99,7 +99,7 @@ if ($filters['include_let'])     { $activeChips['include_let'] = 'Including let 
           <select id="min_price" name="min_price">
             <option value="">No minimum</option>
             <?php foreach ([750, 1000, 1250, 1500, 2000, 2500] as $p): ?>
-              <option value="<?= $p ?>" <?= $filters['min_price'] === $p ? 'selected' : '' ?>><?= e(money($p)) ?> pcm</option>
+              <option value="<?= $p ?>" <?= $filters['min_price'] === $p ? 'selected' : '' ?>><?= e(money($p)) ?> <?= e(rent_period()) ?></option>
             <?php endforeach; ?>
           </select>
         </div>
@@ -109,7 +109,7 @@ if ($filters['include_let'])     { $activeChips['include_let'] = 'Including let 
           <select id="max_price" name="max_price">
             <option value="">No maximum</option>
             <?php foreach ([1000, 1250, 1500, 2000, 2500, 3000, 4000] as $p): ?>
-              <option value="<?= $p ?>" <?= $filters['max_price'] === $p ? 'selected' : '' ?>><?= e(money($p)) ?> pcm</option>
+              <option value="<?= $p ?>" <?= $filters['max_price'] === $p ? 'selected' : '' ?>><?= e(money($p)) ?> <?= e(rent_period()) ?></option>
             <?php endforeach; ?>
           </select>
         </div>

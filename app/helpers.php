@@ -70,9 +70,19 @@ function lines(?string $text): array
     return $out;
 }
 
+/**
+ * Formats an amount with the currency symbol set in the admin, so the same
+ * code serves a site quoting £, $, € or anything else.
+ */
 function money(int $amount): string
 {
-    return '£' . number_format($amount);
+    return setting('currency_symbol', '£') . number_format($amount);
+}
+
+/** "pcm", "per month", "/mo" — whatever the market expects. Set in the admin. */
+function rent_period(): string
+{
+    return setting('rent_period_label', 'pcm');
 }
 
 /** "2026-10-01" -> "1 October 2026"; passes through free text like "Now". */
@@ -156,6 +166,25 @@ function asset(string $path): string
 function upload_url(string $filename): string
 {
     return asset('uploads/' . $filename);
+}
+
+/**
+ * URL of the logo shown in the header, or '' when there is none and the
+ * business name should be set in type instead.
+ *
+ * A logo uploaded from Settings wins. Otherwise the bundled artwork is used if
+ * it is present, which is what a fresh install ships with.
+ */
+function logo_url(): string
+{
+    $uploaded = setting('logo_file');
+    if ($uploaded !== '' && is_file(config('upload_path') . '/' . basename($uploaded))) {
+        return upload_url(basename($uploaded));
+    }
+    if (is_file(config('public_path') . '/assets/img/logo-mark.png')) {
+        return asset('assets/img/logo-mark.png');
+    }
+    return '';
 }
 
 function redirect(string $path, array $query = []): void
@@ -443,6 +472,89 @@ function store_uploaded_image(array $file): array
 
     if (!$ok) {
         return ['ok' => false, 'error' => 'The image could not be saved. Check that the uploads folder is writable.'];
+    }
+
+    @chmod($dir . '/' . $filename, 0644);
+    return ['ok' => true, 'filename' => $filename];
+}
+
+/**
+ * Stores an uploaded logo.
+ *
+ * Kept separate from store_uploaded_image() because that one re-encodes to
+ * JPEG, which would replace a logo's transparent background with white. Here a
+ * PNG stays a PNG, alpha intact, so the logo sits cleanly on any colour.
+ *
+ * @return array{ok: bool, filename?: string, error?: string}
+ */
+function store_uploaded_logo(array $file): array
+{
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
+        return ['ok' => false, 'error' => 'No file was selected.'];
+    }
+    if ($file['error'] !== UPLOAD_ERR_OK || !is_uploaded_file($file['tmp_name'])) {
+        return ['ok' => false, 'error' => 'The upload did not complete.'];
+    }
+    if ($file['size'] > config('max_upload_bytes')) {
+        return ['ok' => false, 'error' => 'That file is too large.'];
+    }
+
+    $info = @getimagesize($file['tmp_name']);
+    if ($info === false) {
+        return ['ok' => false, 'error' => 'That file is not a readable image.'];
+    }
+
+    [$width, $height, $type] = $info;
+    $readers = [
+        IMAGETYPE_PNG  => ['imagecreatefrompng',  'png'],
+        IMAGETYPE_JPEG => ['imagecreatefromjpeg', 'jpg'],
+        IMAGETYPE_WEBP => ['imagecreatefromwebp', 'png'],
+    ];
+    if (!isset($readers[$type])) {
+        return ['ok' => false, 'error' => 'Please upload a PNG, JPEG or WebP logo. A PNG with a transparent background looks best.'];
+    }
+
+    [$reader, $ext] = $readers[$type];
+    if (!function_exists($reader)) {
+        return ['ok' => false, 'error' => 'This server cannot read that image format.'];
+    }
+
+    $image = @$reader($file['tmp_name']);
+    if (!$image) {
+        return ['ok' => false, 'error' => 'That image could not be read.'];
+    }
+
+    // A logo is only ever shown small; 600px wide is more than enough even on
+    // a high-density screen.
+    $maxWidth = 600;
+    if ($width > $maxWidth) {
+        $newHeight = (int)round($height * ($maxWidth / $width));
+        $resized   = imagecreatetruecolor($maxWidth, $newHeight);
+        imagealphablending($resized, false);
+        imagesavealpha($resized, true);
+        imagefill($resized, 0, 0, imagecolorallocatealpha($resized, 0, 0, 0, 127));
+        imagecopyresampled($resized, $image, 0, 0, 0, 0, $maxWidth, $newHeight, $width, $height);
+        imagedestroy($image);
+        $image = $resized;
+    }
+
+    $dir = config('upload_path');
+    if (!is_dir($dir)) {
+        mkdir($dir, 0775, true);
+    }
+
+    $filename = 'logo-' . bin2hex(random_bytes(6)) . '.' . $ext;
+    if ($ext === 'png') {
+        imagealphablending($image, false);
+        imagesavealpha($image, true);
+        $ok = imagepng($image, $dir . '/' . $filename, 8);
+    } else {
+        $ok = imagejpeg($image, $dir . '/' . $filename, 90);
+    }
+    imagedestroy($image);
+
+    if (!$ok) {
+        return ['ok' => false, 'error' => 'The logo could not be saved. Check that the uploads folder is writable.'];
     }
 
     @chmod($dir . '/' . $filename, 0644);

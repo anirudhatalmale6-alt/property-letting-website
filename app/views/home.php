@@ -55,7 +55,7 @@
           <select id="max_price" name="max_price">
             <option value="">No maximum</option>
             <?php foreach ([1000, 1250, 1500, 2000, 2500, 3000, 4000] as $p): ?>
-              <option value="<?= $p ?>"><?= e(money($p)) ?> pcm</option>
+              <option value="<?= $p ?>"><?= e(money($p)) ?> <?= e(rent_period()) ?></option>
             <?php endforeach; ?>
           </select>
         </div>
@@ -101,7 +101,7 @@
             <div class="stat__label">Properties currently listed</div>
           </div>
           <div class="stat">
-            <div class="stat__value">£0</div>
+            <div class="stat__value"><?= e(money(0)) ?></div>
             <div class="stat__label">Tenant referencing and admin fees</div>
           </div>
           <div class="stat">
@@ -112,7 +112,7 @@
 
         <p class="text-small text-soft mt-32">
           Every fee you could be asked to pay is set out in full on our
-          <a href="<?= e(url('/pricing')) ?>">fees page</a>, as required by the Tenant Fees Act 2019.
+          <a href="<?= e(url('/pricing')) ?>">fees page</a>.
         </p>
       </div>
     </div>

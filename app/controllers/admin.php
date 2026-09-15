@@ -579,6 +579,8 @@ function admin_editable_settings(): array
         'contact_intro'      => ['Contact page introduction', 'textarea', ''],
         'map_embed'          => ['Google Maps embed link', 'text', 'Optional. In Google Maps choose Share, then Embed a map, and paste only the src="..." link from the code it gives you.'],
         'enquiry_notify_email' => ['Send enquiry alerts to', 'text', 'Leave blank to use the contact email address above.'],
+        'currency_symbol'    => ['Currency symbol', 'text', 'Used in front of every price on the site — £, $, € and so on.'],
+        'rent_period_label'  => ['Rent period wording', 'text', 'Shown after each rent figure. "pcm", "per month" or "/mo".'],
         'footer_note'        => ['Footer note', 'textarea', 'The small print at the very bottom of every page.'],
         'primary_colour'     => ['Main colour', 'colour', 'Used for headings, buttons and links.'],
         'theme_accent'       => ['Accent colour', 'colour', 'Used sparingly for highlights and prices.'],
@@ -599,6 +601,28 @@ function admin_settings_save(): void
 {
     require_admin();
     csrf_check();
+
+    // Logo: a new upload replaces the old file, and the tick box removes it
+    // and falls back to the business name set in type.
+    if (input('remove_logo') === '1') {
+        $current = setting('logo_file');
+        if ($current !== '') {
+            delete_upload($current);
+        }
+        setting_save('logo_file', '');
+        flash('success', 'Logo removed.');
+    } elseif (($_FILES['logo']['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_NO_FILE) {
+        $result = store_uploaded_logo($_FILES['logo']);
+        if ($result['ok']) {
+            $previous = setting('logo_file');
+            if ($previous !== '' && $previous !== $result['filename']) {
+                delete_upload($previous);
+            }
+            setting_save('logo_file', $result['filename']);
+        } else {
+            flash('error', 'Logo: ' . $result['error']);
+        }
+    }
 
     foreach (admin_editable_settings() as $key => $field) {
         if (!array_key_exists($key, $_POST)) {

@@ -179,24 +179,27 @@ function seed(PDO $pdo): void
     $now = now();
 
     $settings = [
-        'site_name'        => 'Marlow & Co. Lettings',
-        'site_tagline'     => 'Quality rental homes, managed properly',
-        'contact_email'    => 'lettings@example.com',
-        'contact_phone'    => '01234 567 890',
-        'contact_address'  => "12 High Street\nMarlow\nSL7 1AA",
+        'site_name'        => 'Hanu Property Management',
+        'site_tagline'     => 'Professional. Reliable. Personalized.',
+        'logo_file'        => '',
+        'contact_email'    => 'info@hanupropertymanagement.com',
+        'contact_phone'    => '',
+        'contact_address'  => '',
         'office_hours'     => "Mon–Fri: 9am – 5:30pm\nSat: 10am – 2pm\nSun: Closed",
         'hero_heading'     => 'Find your next home',
-        'hero_subheading'  => 'A small, carefully managed portfolio of rental properties across the Thames Valley — looked after by the people who own them.',
+        'hero_subheading'  => 'A carefully managed portfolio of rental properties, looked after by people who answer the phone themselves.',
         'hero_image'       => '',
-        'home_intro_heading' => 'Letting done the straightforward way',
-        'home_intro_body'  => "We manage every property on this site ourselves. That means no call centre, no chain of agents, and a repair request that reaches the person who can actually authorise it.\n\nEvery home is let with a written inventory, a deposit protected in a government-approved scheme, and a named contact you can reach directly.",
-        'pricing_intro'    => 'No hidden charges. Everything you will be asked to pay, listed in one place — as required by the Tenant Fees Act.',
+        'home_intro_heading' => 'Property management done properly',
+        'home_intro_body'  => "We manage every property on this site ourselves. That means no call centre, no chain of agents, and a repair request that reaches the person who can actually authorise it.\n\nEvery home is let with a written inventory, a protected deposit, and a named contact you can reach directly.",
+        'pricing_intro'    => 'No hidden charges. Everything you will be asked to pay, listed in one place.',
         'contact_intro'    => 'Call, email, or send us a message and we will come back to you within one working day.',
         'map_embed'        => '',
-        'footer_note'      => 'Registered in England. Deposits protected with a government-approved scheme.',
+        'footer_note'      => 'Professional. Reliable. Personalized.',
         'enquiry_notify_email' => '',
-        'primary_colour'   => '#1f5f5b',
-        'theme_accent'     => '#c9873f',
+        'currency_symbol'  => '£',
+        'rent_period_label' => 'pcm',
+        'primary_colour'   => '#062952',
+        'theme_accent'     => '#cd9a3a',
     ];
 
     $stmt = $pdo->prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
@@ -210,8 +213,9 @@ function seed(PDO $pdo): void
         ->execute(['admin', password_hash('changeme', PASSWORD_DEFAULT), 'Site owner', $now]);
 
     $pages = [
-        ['about', 'About us', "We are a family-run landlord with a small portfolio of homes in and around Marlow. Every property on this site is owned and managed by us directly.\n\nWe have let property here for over fifteen years. Most of our tenants come to us through word of mouth, and a good number stay for years — which is exactly how we like it."],
+        ['about', 'About us', "Hanu Property Management looks after a portfolio of rental homes on behalf of their owners, and directly for tenants.\n\nWe keep things straightforward. One point of contact, a written inventory at the start of every tenancy, a protected deposit, and repairs that reach the person who can authorise them rather than a queue.\n\nThis page is a placeholder — replace it with your own words from the admin area under Website text."],
         ['privacy', 'Privacy policy', "This page explains what we do with the information you give us through this website.\n\nWhat we collect\nWhen you send an enquiry we collect your name, email address, phone number if you give one, and whatever you write in the message. We also record the date and the IP address the enquiry came from, as a basic anti-spam measure.\n\nWhy we collect it\nWe use it for one purpose only: to answer your enquiry and, if you go on to rent from us, to manage the tenancy. We do not sell it, share it with third parties for marketing, or add you to a mailing list.\n\nHow long we keep it\nEnquiries that do not lead to a tenancy are reviewed and deleted after two years. Tenancy records are kept for six years after the tenancy ends, which is the period we are required to keep them for tax and legal purposes.\n\nYour rights\nYou can ask us what we hold about you, ask us to correct it, or ask us to delete it. Contact us using the details on the contact page and we will respond within one month.\n\nCookies\nThis site sets one cookie, and only for people logging in to the admin area. There is no analytics, advertising or third-party tracking on this website."],
+        ['fees-notes', 'How the money works', "A holding deposit reserves the property while we carry out referencing. If the tenancy goes ahead it comes off your first month's rent. If we cannot proceed for a reason that is not your fault, it is returned in full.\n\nYour deposit is held in a protected scheme and returned at the end of the tenancy, less any deductions that have been agreed.\n\nThis text sits under the fee table. Edit it to match how you actually work, or clear it and the section disappears."],
         ['terms', 'Terms of use', "The information on this website is provided in good faith and is kept as accurate as we can make it, but property details, availability and prices can change. Nothing on this site forms part of a contract or an offer.\n\nMeasurements and floor areas where given are approximate and provided as a guide only. Photographs may have been taken some time ago and may not show the current condition or contents of a property.\n\nAny tenancy will be governed by the written tenancy agreement signed by both parties, not by anything stated here."],
     ];
     $stmt = $pdo->prepare('INSERT OR IGNORE INTO pages (slug, title, body, updated_at) VALUES (?, ?, ?, ?)');
@@ -245,7 +249,7 @@ function seed_properties(PDO $pdo): void
     $now  = now();
     $rows = [
         [
-            'reference' => 'MRL-001',
+            'reference' => 'HAN-001',
             'title'     => 'Two-bedroom garden flat, Station Road',
             'summary'   => 'A bright ground-floor flat with its own south-facing garden, five minutes from the station.',
             'description' => "A genuinely bright two-bedroom ground-floor flat forming part of a converted Edwardian house on a quiet residential road.\n\nThe living room runs the full width of the rear of the building and opens directly onto a private south-facing garden of around forty feet. The kitchen was replaced in 2023 and has an integrated dishwasher and a washer-dryer. Both bedrooms are doubles; the second takes a bed and a desk comfortably.\n\nGas central heating throughout, double glazing, and off-street parking for one car. The station is a five-minute walk and the high street about eight.",
@@ -258,7 +262,7 @@ function seed_properties(PDO $pdo): void
             'letting_status' => 'available', 'is_featured' => 1,
         ],
         [
-            'reference' => 'MRL-002',
+            'reference' => 'HAN-002',
             'title'     => 'Three-bedroom semi-detached house, Oakfield Avenue',
             'summary'   => 'A well-proportioned family house with a garage and a large rear garden, in catchment for two good primaries.',
             'description' => "A 1930s semi-detached house that has been kept in good order and updated where it matters.\n\nTwo reception rooms downstairs — one currently used as a dining room — plus a kitchen extended across the back with room for a table. Upstairs there are two double bedrooms, a good single, and a family bathroom with both a bath and a separate shower.\n\nThe rear garden is mostly lawn with a paved terrace and runs to about seventy feet. There is a single garage and space to park two cars on the drive. Within walking distance of two primary schools.",
@@ -271,7 +275,7 @@ function seed_properties(PDO $pdo): void
             'letting_status' => 'available', 'is_featured' => 1,
         ],
         [
-            'reference' => 'MRL-003',
+            'reference' => 'HAN-003',
             'title'     => 'One-bedroom apartment, Riverside Court',
             'summary'   => 'A modern first-floor apartment with a balcony over the courtyard, furnished and available now.',
             'description' => "A well-kept one-bedroom apartment in a purpose-built block completed in 2016, arranged on the first floor with lift access.\n\nOpen-plan living and kitchen area with a balcony looking over the landscaped courtyard rather than the road. The bedroom is a comfortable double with fitted wardrobes, and the bathroom has a shower over the bath.\n\nLet furnished, including sofa, bed, wardrobe, table and chairs. Allocated parking space, secure bike store, and electric heating with individual metering.",
@@ -284,7 +288,7 @@ function seed_properties(PDO $pdo): void
             'letting_status' => 'available', 'is_featured' => 0,
         ],
         [
-            'reference' => 'MRL-004',
+            'reference' => 'HAN-004',
             'title'     => 'Four-bedroom detached house, Beech Drive',
             'summary'   => 'A substantial detached family home with a study, utility room and double garage.',
             'description' => "A detached house built in the early 1990s and extended by the current owners in 2019.\n\nDownstairs: a large sitting room with a wood-burning stove, a separate dining room, a study, and a kitchen-breakfast room across the back of the house with a utility room off it. Upstairs there are four bedrooms, the principal with an en-suite shower room, plus a family bathroom.\n\nGardens to three sides, laid mainly to lawn with mature planting, and a double garage with power and light.",
@@ -297,7 +301,7 @@ function seed_properties(PDO $pdo): void
             'letting_status' => 'under_offer', 'is_featured' => 0,
         ],
         [
-            'reference' => 'MRL-005',
+            'reference' => 'HAN-005',
             'title'     => 'Two-bedroom cottage, Church Walk',
             'summary'   => 'A period cottage in the old part of town, recently redecorated throughout.',
             'description' => "A Grade II listed cottage tucked away on a pedestrian lane a minute from the church.\n\nThe sitting room has an open fireplace and exposed beams; the kitchen is small but well fitted and leads out to a walled courtyard garden. Two bedrooms upstairs, both doubles, with a shower room between them.\n\nRedecorated throughout in early 2026. Please note there is no off-street parking; a residents' permit is available from the council.",
@@ -310,7 +314,7 @@ function seed_properties(PDO $pdo): void
             'letting_status' => 'available', 'is_featured' => 0,
         ],
         [
-            'reference' => 'MRL-006',
+            'reference' => 'HAN-006',
             'title'     => 'Studio apartment, The Maltings',
             'summary'   => 'A compact, well-planned studio in a converted maltings building. Currently let.',
             'description' => "A studio apartment on the second floor of a handsome converted maltings, with the original windows retained.\n\nThe main room takes a double bed and a seating area, with a separate kitchen off it and a shower room. Storage is better than most studios — there is a walk-in cupboard in the hallway.\n\nCommunal bike store and a residents' courtyard.",
@@ -339,12 +343,12 @@ function seed_properties(PDO $pdo): void
     // not stock photos, so nobody mistakes them for the real property. Each is
     // attached only if the file is actually present.
     $demoImages = [
-        'MRL-001' => ['demo-1-exterior.jpg', 'demo-room-living.jpg', 'demo-room-kitchen.jpg', 'demo-room-bedroom.jpg'],
-        'MRL-002' => ['demo-2-exterior.jpg', 'demo-room-kitchen.jpg', 'demo-room-living.jpg'],
-        'MRL-003' => ['demo-3-exterior.jpg', 'demo-room-living.jpg'],
-        'MRL-004' => ['demo-4-exterior.jpg', 'demo-room-bedroom.jpg', 'demo-room-kitchen.jpg'],
-        'MRL-005' => ['demo-5-exterior.jpg'],
-        'MRL-006' => ['demo-6-exterior.jpg'],
+        'HAN-001' => ['demo-1-exterior.jpg', 'demo-room-living.jpg', 'demo-room-kitchen.jpg', 'demo-room-bedroom.jpg'],
+        'HAN-002' => ['demo-2-exterior.jpg', 'demo-room-kitchen.jpg', 'demo-room-living.jpg'],
+        'HAN-003' => ['demo-3-exterior.jpg', 'demo-room-living.jpg'],
+        'HAN-004' => ['demo-4-exterior.jpg', 'demo-room-bedroom.jpg', 'demo-room-kitchen.jpg'],
+        'HAN-005' => ['demo-5-exterior.jpg'],
+        'HAN-006' => ['demo-6-exterior.jpg'],
     ];
 
     $addImage = $pdo->prepare('INSERT INTO property_images (property_id, filename, alt_text, sort_order) VALUES (?, ?, ?, ?)');

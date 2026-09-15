@@ -26,11 +26,17 @@ $accent   = setting('theme_accent', '#c9873f');
 
 <header class="site-header">
   <div class="wrap site-header__inner">
+    <?php $logo = logo_url(); ?>
     <a class="brand" href="<?= e(url('/')) ?>">
-      <span class="brand__name"><?= e($siteName) ?></span>
-      <?php if (setting('site_tagline') !== ''): ?>
-        <span class="brand__tagline"><?= e(setting('site_tagline')) ?></span>
+      <?php if ($logo !== ''): ?>
+        <img class="brand__logo" src="<?= e($logo) ?>" alt="" width="180" height="90">
       <?php endif; ?>
+      <span>
+        <span class="brand__name"><?= e($siteName) ?></span>
+        <?php if (setting('site_tagline') !== ''): ?>
+          <span class="brand__tagline"><?= e(setting('site_tagline')) ?></span>
+        <?php endif; ?>
+      </span>
     </a>
 
     <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">
