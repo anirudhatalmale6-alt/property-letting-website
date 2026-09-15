@@ -1,0 +1,20 @@
+# The live database and anything SQLite writes alongside it.
+data/site.sqlite
+data/site.sqlite-wal
+data/site.sqlite-shm
+
+# Local configuration and credentials.
+app/config.local.php
+
+# Uploaded photographs belong to the site, not the repository — except the
+# demo images that ship with a fresh install.
+public/uploads/*
+!public/uploads/.htaccess
+!public/uploads/demo-*.jpg
+
+# Editor and OS noise.
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/

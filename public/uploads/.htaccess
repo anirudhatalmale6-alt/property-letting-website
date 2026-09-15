@@ -1,0 +1,22 @@
+# Uploaded photographs live here and nothing in this folder should ever be
+# executed. Uploads are already re-encoded as JPEG before being written, so a
+# script cannot survive the upload — this is the belt to that braces.
+
+Options -Indexes
+
+<IfModule mod_php.c>
+    php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+    php_flag engine off
+</IfModule>
+
+<FilesMatch "\.(?i:php|phtml|phar|php3|php4|php5|php7|php8|pl|py|cgi|sh|htaccess)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>

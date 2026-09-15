@@ -1,0 +1,24 @@
+# ---------------------------------------------------------------------------
+# Only needed when your hosting cannot point the domain at the public/ folder.
+#
+# On hosting where the domain's document root is fixed (most cPanel accounts
+# point at public_html), upload the whole project into that folder and this
+# file quietly serves the site from public/ while keeping app/ and data/ out
+# of reach.
+#
+# If you CAN set the document root to .../public, this file is not used at all
+# and can be left where it is.
+# ---------------------------------------------------------------------------
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Block direct access to the application, the database and the docs.
+    RewriteRule ^(app|data|docs)/ - [F,L]
+
+    # Serve everything from public/ without showing it in the address bar.
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+Options -Indexes

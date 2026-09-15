@@ -1,0 +1,60 @@
+# ---------------------------------------------------------------------------
+# Apache configuration for the public folder.
+#
+# This folder is the only one that should be reachable from the web. If your
+# hosting lets you point the domain at a sub-folder, point it here. If it does
+# not, the .htaccess in the folder above handles it for you.
+# ---------------------------------------------------------------------------
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Send every request that is not a real file or folder to the front
+    # controller, which does the routing.
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>
+
+# Never serve a directory listing.
+Options -Indexes
+
+# index.php is the only script that should ever be requested directly. Anything
+# else with a script extension in here is denied.
+<FilesMatch "\.(?i:php|phtml|phar|php3|php4|php5|php7|php8|pl|py|cgi|sh)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# ...except the front controller itself.
+<Files "index.php">
+    <IfModule mod_authz_core.c>
+        Require all granted
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Allow from all
+    </IfModule>
+</Files>
+
+# Cache static assets. The stylesheet and script URLs carry a ?v= stamp based
+# on the file's modification time, so a new version is picked up immediately
+# despite the long cache life.
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpeg      "access plus 1 month"
+    ExpiresByType image/png       "access plus 1 month"
+    ExpiresByType image/webp      "access plus 1 month"
+    ExpiresByType image/svg+xml   "access plus 1 month"
+    ExpiresByType text/css        "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+</IfModule>
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css application/javascript application/xml text/plain
+</IfModule>
