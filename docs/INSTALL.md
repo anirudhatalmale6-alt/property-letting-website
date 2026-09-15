@@ -58,7 +58,7 @@ return [
     'env'        => 'prod',                  // 'dev' shows errors on screen
     'mail_from'  => 'website@yourdomain.co.uk',
     'mail_from_name' => 'Your Business Name',
-    'enquiry_retention_days' => 730,
+    'inquiry_retention_days' => 730,
 ];
 ```
 
@@ -68,7 +68,7 @@ an update would overwrite it.
 
 ### Email
 
-Enquiry notifications use PHP's `mail()`, which works on most shared hosting.
+Inquiry notifications use PHP's `mail()`, which works on most shared hosting.
 Set `mail_from` to an address **at your own domain** — a From address at
 gmail.com or similar will be rejected or spam-filed by the receiving server.
 
@@ -76,7 +76,7 @@ If your host blocks `mail()`, swap the body of `send_mail()` in
 `app/helpers.php` for an SMTP library such as PHPMailer. It is one function and
 it is the only place mail is sent from.
 
-An enquiry is always written to the database before any mail is attempted, so a
+An inquiry is always written to the database before any mail is attempted, so a
 mail problem never loses you a lead — it will still be in the admin inbox.
 
 ## HTTPS
@@ -107,7 +107,7 @@ the whole deployment story.
 
 Two things matter:
 
-- `data/site.sqlite` — every property, enquiry, fee and setting
+- `data/site.sqlite` — every property, inquiry, fee and setting
 - `public/uploads/` — the photographs
 
 Download both and you have a complete backup. To restore, put them back.

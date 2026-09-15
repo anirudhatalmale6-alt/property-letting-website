@@ -72,20 +72,24 @@ function lines(?string $text): array
 
 /**
  * Formats an amount with the currency symbol set in the admin, so the same
- * code serves a site quoting £, $, € or anything else.
+ * code serves a site quoting $, £, € or anything else.
  */
 function money(int $amount): string
 {
-    return setting('currency_symbol', '£') . number_format($amount);
+    return setting('currency_symbol', '$') . number_format($amount);
 }
 
-/** "pcm", "per month", "/mo" — whatever the market expects. Set in the admin. */
+/** "/mo", "per month", "pcm" — whatever the market expects. Set in the admin. */
 function rent_period(): string
 {
-    return setting('rent_period_label', 'pcm');
+    return setting('rent_period_label', '/mo');
 }
 
-/** "2026-10-01" -> "1 October 2026"; passes through free text like "Now". */
+/**
+ * "2026-10-01" -> "October 1, 2026" with the US default; passes free text such
+ * as "Now" straight through. The pattern comes from the date_format setting so
+ * a site outside the US can use its own convention.
+ */
 function pretty_date(string $value): string
 {
     $value = trim($value);
@@ -96,13 +100,18 @@ function pretty_date(string $value): string
     if ($ts === false || !preg_match('/^\d{4}-\d{2}-\d{2}/', $value)) {
         return $value;
     }
-    return date('j F Y', $ts);
+    return date(setting('date_format', 'F j, Y'), $ts);
 }
 
+/** Timestamps are stored in UTC; shown here in the format the owner chose. */
 function pretty_datetime(string $value): string
 {
     $ts = strtotime($value . ' UTC');
-    return $ts ? date('j M Y, H:i', $ts) : $value;
+    if (!$ts) {
+        return $value;
+    }
+    $format = setting('date_format', 'F j, Y') === 'j F Y' ? 'j M Y, H:i' : 'M j, Y, g:ia';
+    return date($format, $ts);
 }
 
 function slugify(string $text): string
@@ -483,7 +492,7 @@ function store_uploaded_image(array $file): array
  *
  * Kept separate from store_uploaded_image() because that one re-encodes to
  * JPEG, which would replace a logo's transparent background with white. Here a
- * PNG stays a PNG, alpha intact, so the logo sits cleanly on any colour.
+ * PNG stays a PNG, alpha intact, so the logo sits cleanly on any color.
  *
  * @return array{ok: bool, filename?: string, error?: string}
  */
@@ -595,7 +604,7 @@ function delete_upload(string $filename): void
 
 /**
  * Sends a plain-text notification. Returns false if mail is disabled or the
- * host refused it — the caller decides whether that matters. An enquiry is
+ * host refused it — the caller decides whether that matters. An inquiry is
  * always saved to the database first, so a mail failure never loses a lead.
  */
 function send_mail(string $to, string $subject, string $body, string $replyTo = ''): bool

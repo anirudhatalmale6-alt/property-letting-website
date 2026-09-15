@@ -1,7 +1,7 @@
 <?php
 /**
  * @var int   $liveCount, $letCount, $archivedCount, $retentionDue
- * @var array $enquiryCounts, $recent
+ * @var array $inquiryCounts, $recent
  */
 ?>
 
@@ -18,15 +18,15 @@
 <div class="stat-cards">
   <a class="stat-card" href="<?= e(url('/admin/properties')) ?>">
     <div class="stat-card__value"><?= (int)$liveCount ?></div>
-    <div class="stat-card__label">Available to let</div>
+    <div class="stat-card__label">Available to rent</div>
   </a>
   <a class="stat-card" href="<?= e(url('/admin/properties')) ?>">
     <div class="stat-card__value"><?= (int)$letCount ?></div>
-    <div class="stat-card__label">Let or under offer</div>
+    <div class="stat-card__label">Rented or pending</div>
   </a>
-  <a class="stat-card" href="<?= e(url('/admin/enquiries', ['status' => 'new'])) ?>">
-    <div class="stat-card__value"><?= (int)($enquiryCounts['new'] ?? 0) ?></div>
-    <div class="stat-card__label">New enquiries</div>
+  <a class="stat-card" href="<?= e(url('/admin/inquiries', ['status' => 'new'])) ?>">
+    <div class="stat-card__value"><?= (int)($inquiryCounts['new'] ?? 0) ?></div>
+    <div class="stat-card__label">New inquiries</div>
   </a>
   <a class="stat-card" href="<?= e(url('/admin/properties', ['show' => 'archived'])) ?>">
     <div class="stat-card__value"><?= (int)$archivedCount ?></div>
@@ -37,20 +37,20 @@
 <?php if ($retentionDue > 0): ?>
   <div class="alert">
     <?= (int)$retentionDue ?> enquir<?= $retentionDue === 1 ? 'y is' : 'ies are' ?> older than
-    <?= (int)config('enquiry_retention_days') ?> days. Under your privacy policy these should be
-    reviewed and deleted. <a href="<?= e(url('/admin/enquiries')) ?>">Go to enquiries</a>.
+    <?= (int)config('inquiry_retention_days') ?> days. Under your privacy policy these should be
+    reviewed and deleted. <a href="<?= e(url('/admin/inquiries')) ?>">Go to inquiries</a>.
   </div>
 <?php endif; ?>
 
 <div class="panel panel--flush">
   <div class="panel__head" style="padding: 20px 22px 14px; margin-bottom: 0;">
-    <h2>Latest enquiries</h2>
+    <h2>Latest inquiries</h2>
     <p>The six most recent messages from the website.</p>
   </div>
 
   <?php if (!$recent): ?>
     <div class="empty" style="border: 0; background: none;">
-      <p class="mb-0">No enquiries yet. They will appear here as soon as someone uses a form on the site.</p>
+      <p class="mb-0">No inquiries yet. They will appear here as soon as someone uses a form on the site.</p>
     </div>
   <?php else: ?>
     <div class="table-wrap">
@@ -65,26 +65,26 @@
           </tr>
         </thead>
         <tbody>
-          <?php foreach ($recent as $enquiry): ?>
-            <tr class="<?= $enquiry['status'] === 'new' ? 'row--unread' : '' ?>">
+          <?php foreach ($recent as $inquiry): ?>
+            <tr class="<?= $inquiry['status'] === 'new' ? 'row--unread' : '' ?>">
               <td>
                 <div class="table__title">
-                  <a href="<?= e(url('/admin/enquiries/' . $enquiry['id'])) ?>"><?= e($enquiry['name']) ?></a>
+                  <a href="<?= e(url('/admin/inquiries/' . $inquiry['id'])) ?>"><?= e($inquiry['name']) ?></a>
                 </div>
-                <div class="table__sub"><?= e($enquiry['email']) ?></div>
+                <div class="table__sub"><?= e($inquiry['email']) ?></div>
               </td>
               <td>
-                <?php if ($enquiry['property_title']): ?>
-                  <?= e(excerpt($enquiry['property_title'], 42)) ?>
-                  <div class="table__sub"><?= e((string)$enquiry['property_reference']) ?></div>
+                <?php if ($inquiry['property_title']): ?>
+                  <?= e(excerpt($inquiry['property_title'], 42)) ?>
+                  <div class="table__sub"><?= e((string)$inquiry['property_reference']) ?></div>
                 <?php else: ?>
-                  <span class="text-soft">General enquiry</span>
+                  <span class="text-soft">General inquiry</span>
                 <?php endif; ?>
               </td>
-              <td class="nowrap text-small text-soft"><?= e(pretty_datetime($enquiry['created_at'])) ?></td>
-              <td><span class="tag tag--<?= e($enquiry['status']) ?>"><?= e(ENQUIRY_STATUSES[$enquiry['status']] ?? $enquiry['status']) ?></span></td>
+              <td class="nowrap text-small text-soft"><?= e(pretty_datetime($inquiry['created_at'])) ?></td>
+              <td><span class="tag tag--<?= e($inquiry['status']) ?>"><?= e(INQUIRY_STATUSES[$inquiry['status']] ?? $inquiry['status']) ?></span></td>
               <td class="table__actions">
-                <a class="btn btn--ghost btn--small" href="<?= e(url('/admin/enquiries/' . $enquiry['id'])) ?>">Open</a>
+                <a class="btn btn--ghost btn--small" href="<?= e(url('/admin/inquiries/' . $inquiry['id'])) ?>">Open</a>
               </td>
             </tr>
           <?php endforeach; ?>
@@ -119,7 +119,7 @@
       <h3>Change the wording</h3>
       <p class="text-small text-soft">
         Website text covers the About, Privacy and Terms pages. Settings covers the home page
-        headline, your contact details and the site colours.
+        headline, your contact details and the site colors.
       </p>
     </div>
   </div>

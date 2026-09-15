@@ -6,16 +6,16 @@ $groups = [
     'Your business'   => ['site_name', 'site_tagline'],
     'Home page'       => ['hero_heading', 'hero_subheading', 'home_intro_heading', 'home_intro_body'],
     'Contact details' => ['contact_email', 'contact_phone', 'contact_address', 'office_hours', 'contact_intro', 'map_embed'],
-    'Enquiries'       => ['enquiry_notify_email'],
-    'Prices'          => ['currency_symbol', 'rent_period_label'],
-    'Appearance'      => ['primary_colour', 'theme_accent', 'footer_note'],
+    'Inquiries'       => ['inquiry_notify_email'],
+    'Prices and formats' => ['currency_symbol', 'rent_period_label', 'date_format', 'default_state'],
+    'Appearance'      => ['primary_color', 'theme_accent', 'footer_note', 'fair_housing_note'],
 ];
 ?>
 
 <div class="adm-head">
   <div>
     <h1>Settings</h1>
-    <p>Your business details, the home page wording and the site colours.</p>
+    <p>Your business details, the home page wording and the site colors.</p>
   </div>
   <div class="adm-head__actions">
     <a class="btn btn--ghost" href="<?= e(url('/')) ?>" target="_blank" rel="noopener">View website ↗</a>
@@ -73,7 +73,7 @@ $groups = [
           <?php if ($type === 'textarea'): ?>
             <textarea id="<?= e($key) ?>" name="<?= e($key) ?>" style="min-height: 110px;"><?= e(setting($key)) ?></textarea>
 
-          <?php elseif ($type === 'colour'): ?>
+          <?php elseif ($type === 'color'): ?>
             <div style="display: flex; gap: 10px; align-items: center;">
               <input type="color" id="<?= e($key) ?>" name="<?= e($key) ?>" value="<?= e(setting($key) ?: '#1f5f5b') ?>">
               <code class="text-small text-soft"><?= e(setting($key)) ?></code>

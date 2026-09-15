@@ -2,7 +2,7 @@
    Public site behaviour.
 
    Deliberately small and dependency-free: the mobile menu, the gallery
-   thumbnails, and a guard that stops a double-click sending an enquiry twice.
+   thumbnails, and a guard that stops a double-click sending an inquiry twice.
    Everything here is an enhancement — the site works with JavaScript off.
    --------------------------------------------------------------------------- */
 

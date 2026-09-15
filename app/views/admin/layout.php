@@ -6,7 +6,7 @@
  * @var string $title
  */
 $user   = auth_user();
-$counts = enquiries_count_by_status();
+$counts = inquiries_count_by_status();
 $newCount = $counts['new'] ?? 0;
 ?>
 <!doctype html>
@@ -40,8 +40,8 @@ $newCount = $counts['new'] ?? 0;
   <nav class="adm-nav" id="adm-nav" aria-label="Admin sections">
     <a class="adm-nav__link<?= current_path() === '/admin' ? ' is-active' : '' ?>" href="<?= e(url('/admin')) ?>">Dashboard</a>
     <a class="adm-nav__link<?= nav_active('/admin/properties') ?>" href="<?= e(url('/admin/properties')) ?>">Properties</a>
-    <a class="adm-nav__link<?= nav_active('/admin/enquiries') ?>" href="<?= e(url('/admin/enquiries')) ?>">
-      Enquiries
+    <a class="adm-nav__link<?= nav_active('/admin/inquiries') ?>" href="<?= e(url('/admin/inquiries')) ?>">
+      Inquiries
       <?php if ($newCount > 0): ?><span class="pill"><?= (int)$newCount ?></span><?php endif; ?>
     </a>
     <a class="adm-nav__link<?= nav_active('/admin/pricing') ?>" href="<?= e(url('/admin/pricing')) ?>">Fees and charges</a>

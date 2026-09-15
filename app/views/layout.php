@@ -7,7 +7,7 @@
  * @var string $meta
  */
 $siteName = setting('site_name');
-$primary  = setting('primary_colour', '#1f5f5b');
+$primary  = setting('primary_color', '#062952');
 $accent   = setting('theme_accent', '#c9873f');
 ?>
 <!doctype html>
@@ -86,12 +86,19 @@ $accent   = setting('theme_accent', '#c9873f');
 
     <div class="site-footer__block">
       <h2 class="site-footer__heading">Pages</h2>
-      <a href="<?= e(url('/properties')) ?>">Properties to let</a>
+      <a href="<?= e(url('/properties')) ?>">Properties for rent</a>
       <a href="<?= e(url('/pricing')) ?>">Fees and charges</a>
+      <a href="<?= e(url('/disclosures')) ?>">Disclosures</a>
       <a href="<?= e(url('/privacy')) ?>">Privacy policy</a>
       <a href="<?= e(url('/terms')) ?>">Terms of use</a>
     </div>
   </div>
+
+  <?php if (setting('fair_housing_note') !== ''): ?>
+    <div class="wrap site-footer__fair">
+      <p><?= e(setting('fair_housing_note')) ?></p>
+    </div>
+  <?php endif; ?>
 
   <div class="wrap site-footer__legal">
     <p><?= e(setting('footer_note')) ?></p>

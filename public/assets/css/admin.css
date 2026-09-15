@@ -30,7 +30,7 @@ body.admin {
   -webkit-font-smoothing: antialiased;
 }
 
-body.admin--centred {
+body.admin--centered {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   min-height: 100vh; padding: 24px; gap: 16px;
 }
@@ -182,8 +182,8 @@ a.stat-card:hover { border-color: var(--adm-primary); }
   white-space: nowrap;
 }
 .tag--available   { background: #e4f4ea; color: #146c3a; }
-.tag--under_offer { background: #fdf0e0; color: #8a5518; }
-.tag--let         { background: #eceff1; color: #52606d; }
+.tag--pending { background: #fdf0e0; color: #8a5518; }
+.tag--rented         { background: #eceff1; color: #52606d; }
 .tag--archived    { background: #f3e8e7; color: #8a2c25; }
 .tag--featured    { background: #e7edf6; color: #2c4a7c; }
 .tag--new         { background: #fdecea; color: #a32118; }

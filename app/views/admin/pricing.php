@@ -71,11 +71,11 @@
         </div>
         <div class="field">
           <label for="new_amount">Amount</label>
-          <input type="text" id="new_amount" name="new_amount" placeholder="£200">
+          <input type="text" id="new_amount" name="new_amount" placeholder="$250">
         </div>
         <div class="field">
           <label for="new_description">What it covers</label>
-          <input type="text" id="new_description" name="new_description" placeholder="Refundable at the end of the tenancy.">
+          <input type="text" id="new_description" name="new_description" placeholder="Refundable at the end of the lease.">
         </div>
         <div class="field"></div>
         <div class="field"></div>

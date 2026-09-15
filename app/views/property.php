@@ -5,9 +5,9 @@
  * @var array $property
  * @var array $images
  * @var array $similar
- * @var array $errors   Populated when the enquiry form was submitted with problems.
+ * @var array $errors   Populated when the inquiry form was submitted with problems.
  */
-$isLet    = $property['letting_status'] === 'let';
+$isRented = $property['listing_status'] === 'rented';
 $features = lines($property['features']);
 $cover    = $images[0] ?? null;
 ?>
@@ -18,7 +18,7 @@ $cover    = $images[0] ?? null;
       <a href="<?= e(url('/properties')) ?>">Properties</a> &nbsp;/&nbsp; <?= e($property['reference']) ?>
     </p>
     <h1><?= e($property['title']) ?></h1>
-    <p><?= e(trim($property['address_line'] . ', ' . $property['city'] . ' ' . $property['postcode'], ', ')) ?></p>
+    <p><?= e(format_address($property)) ?></p>
   </div>
 </section>
 
@@ -68,16 +68,28 @@ $cover    = $images[0] ?? null;
           <?php if ($property['available_from'] !== ''): ?>
             <li><div class="spec__label">Available</div><div class="spec__value"><?= e(pretty_date($property['available_from'])) ?></div></li>
           <?php endif; ?>
-          <?php if ($property['epc_rating'] !== ''): ?>
-            <li><div class="spec__label">EPC rating</div><div class="spec__value"><?= e($property['epc_rating']) ?></div></li>
+          <?php if ($property['lease_term'] !== ''): ?>
+            <li><div class="spec__label">Lease term</div><div class="spec__value"><?= e($property['lease_term']) ?></div></li>
           <?php endif; ?>
-          <?php if ($property['council_tax_band'] !== ''): ?>
-            <li><div class="spec__label">Council tax band</div><div class="spec__value"><?= e($property['council_tax_band']) ?></div></li>
+          <?php if ($property['pets'] !== ''): ?>
+            <li><div class="spec__label">Pets</div><div class="spec__value"><?= e($property['pets']) ?></div></li>
           <?php endif; ?>
-          <?php if ((int)$property['deposit'] > 0): ?>
-            <li><div class="spec__label">Deposit</div><div class="spec__value"><?= e(money((int)$property['deposit'])) ?></div></li>
+          <?php if ($property['parking'] !== ''): ?>
+            <li><div class="spec__label">Parking</div><div class="spec__value"><?= e($property['parking']) ?></div></li>
+          <?php endif; ?>
+          <?php if ($property['year_built'] !== ''): ?>
+            <li><div class="spec__label">Year built</div><div class="spec__value"><?= e($property['year_built']) ?></div></li>
+          <?php endif; ?>
+          <?php if ((int)$property['security_deposit'] > 0): ?>
+            <li><div class="spec__label">Security deposit</div><div class="spec__value"><?= e(money((int)$property['security_deposit'])) ?></div></li>
           <?php endif; ?>
         </ul>
+
+        <?php if ($property['utilities_included'] !== ''): ?>
+          <p class="notice-let" style="margin-bottom: 30px;">
+            <strong>Utilities:</strong> <?= e($property['utilities_included']) ?>
+          </p>
+        <?php endif; ?>
 
         <?php if ($property['description'] !== ''): ?>
           <h2>About this property</h2>
@@ -93,30 +105,31 @@ $cover    = $images[0] ?? null;
           </ul>
         <?php endif; ?>
 
-        <h2>Before you enquire</h2>
+        <h2>Before you inquire</h2>
         <p class="text-soft">
-          We do not charge tenants for referencing, inventories or the tenancy agreement. The only
-          payments you will be asked for are listed on our <a href="<?= e(url('/pricing')) ?>">fees page</a>.
-          Your deposit is protected in a government-approved scheme.
+          Every payment you could be asked for is listed on our
+          <a href="<?= e(url('/pricing')) ?>">fees page</a>, and the disclosures that apply to our
+          rentals are set out on the <a href="<?= e(url('/disclosures')) ?>">disclosures page</a>.
+          If anything is unclear, ask us before you commit to anything.
         </p>
       </div>
 
       <aside>
         <div class="aside-card">
-          <div class="aside-card__price"><?= e(money((int)$property['price_pcm'])) ?> <span>per month</span></div>
+          <div class="aside-card__price"><?= e(money((int)$property['monthly_rent'])) ?> <span>per month</span></div>
           <p class="aside-card__meta">
-            <?php if ($isLet || $property['available_from'] === ''): ?>
-              <?= e(LETTING_STATUSES[$property['letting_status']] ?? '') ?>
-            <?php elseif ($property['letting_status'] === 'under_offer'): ?>
-              Under offer &middot; available from <?= e(pretty_date($property['available_from'])) ?>
+            <?php if ($isRented || $property['available_from'] === ''): ?>
+              <?= e(LISTING_STATUSES[$property['listing_status']] ?? '') ?>
+            <?php elseif ($property['listing_status'] === 'pending'): ?>
+              Application pending &middot; available from <?= e(pretty_date($property['available_from'])) ?>
             <?php else: ?>
               Available from <?= e(pretty_date($property['available_from'])) ?>
             <?php endif; ?>
           </p>
 
-          <?php if ($isLet): ?>
+          <?php if ($isRented): ?>
             <div class="notice-let">
-              <strong>This property is now let.</strong>
+              <strong>This property is now rented.</strong>
               <p class="mb-0 mt-24" style="margin-top: 8px;">
                 It is shown here as an example of the homes we manage.
                 <a href="<?= e(url('/properties')) ?>">See what is available</a>, or
@@ -124,7 +137,7 @@ $cover    = $images[0] ?? null;
               </p>
             </div>
           <?php else: ?>
-            <h2 style="font-size: 1.15rem; margin-bottom: .6em;" id="enquire">Enquire about this property</h2>
+            <h2 style="font-size: 1.15rem; margin-bottom: .6em;" id="inquire">Inquire about this property</h2>
 
             <?php if ($errors): ?>
               <div class="alert alert--error" style="margin-top: 0;">
@@ -175,13 +188,13 @@ $cover    = $images[0] ?? null;
                   <input type="checkbox" id="consent" name="consent" value="1" <?= old('consent') === '1' ? 'checked' : '' ?>>
                   <label for="consent">
                     I am happy for <?= e(setting('site_name')) ?> to hold these details in order to reply to
-                    my enquiry, as set out in the <a href="<?= e(url('/privacy')) ?>">privacy policy</a>.
+                    my inquiry, as set out in the <a href="<?= e(url('/privacy')) ?>">privacy policy</a>.
                   </label>
                 </div>
                 <?php if (isset($errors['consent'])): ?><p class="field__error"><?= e($errors['consent']) ?></p><?php endif; ?>
               </div>
 
-              <button class="btn btn--block" type="submit">Send enquiry</button>
+              <button class="btn btn--block" type="submit">Send inquiry</button>
             </form>
           <?php endif; ?>
 

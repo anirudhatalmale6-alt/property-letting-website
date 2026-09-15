@@ -1,14 +1,14 @@
 <?php
 /**
  * Public-facing pages: the listings, an individual property, pricing,
- * contact, the editable text pages, and the two enquiry forms.
+ * contact, the editable text pages, and the two inquiry forms.
  */
 
 declare(strict_types=1);
 
 function site_home(): void
 {
-    $featured = properties_search(['include_let' => false], 'newest', 3);
+    $featured = properties_search(['include_rented' => false], 'newest', 3);
 
     // If nothing has been marked featured yet, fall back to the newest three
     // so the home page is never empty.
@@ -30,7 +30,7 @@ function site_properties(): void
         'min_price' => input_int('min_price'),
         'max_price' => input_int('max_price'),
         'furnished' => input('furnished'),
-        'include_let' => input('include_let') === '1',
+        'include_rented' => input('include_rented') === '1',
     ];
     $sort = input('sort', 'newest');
     if (!isset(PROPERTY_SORTS[$sort])) {
@@ -44,7 +44,7 @@ function site_properties(): void
     $page    = min($page, $pages);
 
     view('properties', [
-        'title'      => 'Properties to let',
+        'title'      => 'Properties for rent',
         'meta'       => 'Browse available rental properties from ' . setting('site_name') . '.',
         'properties' => properties_search($filters, $sort, $perPage, ($page - 1) * $perPage),
         'filters'    => $filters,
@@ -69,7 +69,7 @@ function site_property(string $slug): void
         'property' => $property,
         'images'   => property_images((int)$property['id']),
         'similar'  => properties_search(
-            ['city' => $property['city'], 'include_let' => false],
+            ['city' => $property['city'], 'include_rented' => false],
             'newest',
             3
         ),
@@ -77,8 +77,8 @@ function site_property(string $slug): void
     ]);
 }
 
-/** Handles the enquiry form that sits on a property page. */
-function site_property_enquiry(string $slug): void
+/** Handles the inquiry form that sits on a property page. */
+function site_property_inquiry(string $slug): void
 {
     csrf_check();
 
@@ -87,7 +87,7 @@ function site_property_enquiry(string $slug): void
         not_found('That property is no longer listed.');
     }
 
-    $errors = validate_enquiry();
+    $errors = validate_inquiry();
     if ($errors) {
         keep_old($_POST);
         view('property', [
@@ -101,7 +101,7 @@ function site_property_enquiry(string $slug): void
         return;
     }
 
-    store_and_notify_enquiry([
+    store_and_notify_inquiry([
         'property_id'  => (int)$property['id'],
         'kind'         => 'property',
         'name'         => input('name'),
@@ -113,7 +113,7 @@ function site_property_enquiry(string $slug): void
     ], $property);
 
     clear_old();
-    redirect('/enquiry-received');
+    redirect('/inquiry-received');
 }
 
 function site_pricing(): void
@@ -122,7 +122,7 @@ function site_pricing(): void
 
     view('pricing', [
         'title' => 'Fees and charges',
-        'meta'  => 'A full list of the fees and charges that apply to a tenancy.',
+        'meta'  => 'A full list of the fees and charges that apply to a lease.',
         'items' => $items,
     ]);
 }
@@ -140,14 +140,14 @@ function site_contact_submit(): void
 {
     csrf_check();
 
-    $errors = validate_enquiry(false);
+    $errors = validate_inquiry(false);
     if ($errors) {
         keep_old($_POST);
         site_contact($errors);
         return;
     }
 
-    store_and_notify_enquiry([
+    store_and_notify_inquiry([
         'property_id'  => 0,
         'kind'         => 'general',
         'name'         => input('name'),
@@ -159,14 +159,14 @@ function site_contact_submit(): void
     ], null);
 
     clear_old();
-    redirect('/enquiry-received');
+    redirect('/inquiry-received');
 }
 
-function site_enquiry_received(): void
+function site_inquiry_received(): void
 {
-    view('enquiry_received', [
+    view('inquiry_received', [
         'title' => 'Thank you',
-        'meta'  => 'Your enquiry has been received.',
+        'meta'  => 'Your inquiry has been received.',
     ]);
 }
 
@@ -188,9 +188,9 @@ function site_page(string $slug): void
 function site_sitemap(): void
 {
     $base = site_base_url();
-    $urls = ['/', '/properties', '/pricing', '/contact', '/about', '/privacy', '/terms'];
+    $urls = ['/', '/properties', '/pricing', '/contact', '/about', '/disclosures', '/privacy', '/terms'];
 
-    foreach (properties_search(['include_let' => true], 'newest', 500) as $p) {
+    foreach (properties_search(['include_rented' => true], 'newest', 500) as $p) {
         $urls[] = '/property/' . $p['slug'];
     }
 
@@ -212,7 +212,7 @@ function site_robots(): void
 }
 
 // ---------------------------------------------------------------------------
-// Shared helpers for the two enquiry forms
+// Shared helpers for the two inquiry forms
 // ---------------------------------------------------------------------------
 
 function site_base_url(): string
@@ -225,11 +225,11 @@ function site_base_url(): string
 }
 
 /**
- * @param bool $withMoveIn  Property enquiries ask for a move-in date; the
+ * @param bool $withMoveIn  Property inquiries ask for a move-in date; the
  *                          general contact form does not.
  * @return array<string,string> field => message
  */
-function validate_enquiry(bool $withMoveIn = true): array
+function validate_inquiry(bool $withMoveIn = true): array
 {
     $errors = [];
 
@@ -239,7 +239,7 @@ function validate_enquiry(bool $withMoveIn = true): array
     // learning that it was caught.
     if (input('website') !== '') {
         clear_old();
-        redirect('/enquiry-received');
+        redirect('/inquiry-received');
     }
 
     $name = input('name');
@@ -283,22 +283,22 @@ function validate_enquiry(bool $withMoveIn = true): array
 }
 
 /**
- * Saves the enquiry, then tries to email a notification. The save happens
+ * Saves the inquiry, then tries to email a notification. The save happens
  * first and unconditionally: if the host's mail is misconfigured the lead is
  * still sitting in the admin inbox rather than lost.
  */
-function store_and_notify_enquiry(array $data, ?array $property): void
+function store_and_notify_inquiry(array $data, ?array $property): void
 {
-    $id  = enquiry_create($data);
-    $enq = enquiry_find($id);
+    $id  = inquiry_create($data);
+    $enq = inquiry_find($id);
 
-    $to = setting('enquiry_notify_email') ?: setting('contact_email');
+    $to = setting('inquiry_notify_email') ?: setting('contact_email');
     if (!valid_email($to)) {
         return;
     }
 
-    $subjectBit = $property ? $property['reference'] . ' — ' . $property['title'] : 'General enquiry';
-    $body = "A new enquiry has come in through the website.\n\n"
+    $subjectBit = $property ? $property['reference'] . ' — ' . $property['title'] : 'General inquiry';
+    $body = "A new inquiry has come in through the website.\n\n"
           . "Reference: {$enq['reference']}\n"
           . "About:     {$subjectBit}\n"
           . "Name:      {$data['name']}\n"
@@ -310,18 +310,18 @@ function store_and_notify_enquiry(array $data, ?array $property): void
     }
 
     $body .= "\nMessage\n-------\n" . $data['message'] . "\n\n"
-           . "View it in the admin area: " . site_base_url() . url('/admin/enquiries/' . $id) . "\n";
+           . "View it in the admin area: " . site_base_url() . url('/admin/inquiries/' . $id) . "\n";
 
-    send_mail($to, 'Website enquiry ' . $enq['reference'] . ' — ' . $subjectBit, $body, $data['email']);
+    send_mail($to, 'Website inquiry ' . $enq['reference'] . ' — ' . $subjectBit, $body, $data['email']);
 
-    // Acknowledgement to the enquirer.
+    // Acknowledgement to the inquirer.
     $ack = "Hello {$data['name']},\n\n"
-         . "Thank you for your enquiry. We have received it and will come back to you within one working day.\n\n"
+         . "Thank you for your inquiry. We have received it and will come back to you within one business day.\n\n"
          . "Your reference is {$enq['reference']}"
          . ($property ? ", and it relates to {$property['title']}." : '.') . "\n\n"
-         . "There is no need to reply to this message — it is just confirmation that your enquiry arrived.\n\n"
+         . "There is no need to reply to this message — it is just confirmation that your inquiry arrived.\n\n"
          . setting('site_name') . "\n"
          . setting('contact_phone') . "\n";
 
-    send_mail($data['email'], 'We have received your enquiry (' . $enq['reference'] . ')', $ack, setting('contact_email'));
+    send_mail($data['email'], 'We have received your inquiry (' . $enq['reference'] . ')', $ack, setting('contact_email'));
 }

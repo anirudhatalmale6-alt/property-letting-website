@@ -10,7 +10,7 @@
 <section class="hero">
   <div class="wrap">
     <div class="hero__inner">
-      <p class="hero__eyebrow">Properties to let</p>
+      <p class="hero__eyebrow">Properties for rent</p>
       <h1><?= e(setting('hero_heading')) ?></h1>
       <p class="hero__lead"><?= e(setting('hero_subheading')) ?></p>
       <div class="hero__actions">
@@ -27,7 +27,7 @@
       <div class="searchbar__grid">
         <div class="field mb-0">
           <label for="q">Search</label>
-          <input type="search" id="q" name="q" placeholder="Town, postcode or reference">
+          <input type="search" id="q" name="q" placeholder="City, ZIP or reference">
         </div>
 
         <div class="field mb-0">
@@ -73,7 +73,7 @@
   <div class="wrap">
     <div class="section__head">
       <h2>Available now</h2>
-      <p>A selection of what we currently have to let. <a href="<?= e(url('/properties')) ?>">See everything</a>.</p>
+      <p>A selection of what we currently have available. <a href="<?= e(url('/properties')) ?>">See everything</a>.</p>
     </div>
 
     <div class="card-grid">
@@ -106,7 +106,7 @@
           </div>
           <div class="stat">
             <div class="stat__value">1 day</div>
-            <div class="stat__label">We reply to enquiries within one working day</div>
+            <div class="stat__label">We reply to inquiries within one business day</div>
           </div>
         </div>
 
@@ -123,7 +123,7 @@
   <div class="wrap" style="text-align: center; max-width: 660px;">
     <h2>Seen something you like?</h2>
     <p class="text-soft">
-      Send us an enquiry about any property and we will come back to you within one working day —
+      Send us an inquiry about any property and we will come back to you within one business day —
       or call us on <?= e(setting('contact_phone')) ?> if you would rather talk it through.
     </p>
     <p class="mt-24">

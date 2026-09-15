@@ -4,12 +4,12 @@
  *
  * @var array $card  A row from properties_search() (includes cover_image).
  */
-$statusLabel = LETTING_STATUSES[$card['letting_status']] ?? '';
+$statusLabel = LISTING_STATUSES[$card['listing_status']] ?? '';
 ?>
 <article class="card">
   <div class="card__media">
     <?php if ($statusLabel !== ''): ?>
-      <span class="badge badge--<?= e($card['letting_status']) ?>"><?= e($statusLabel) ?></span>
+      <span class="badge badge--<?= e($card['listing_status']) ?>"><?= e($statusLabel) ?></span>
     <?php endif; ?>
     <?php if (!empty($card['is_featured'])): ?>
       <span class="badge badge--featured">Featured</span>
@@ -31,7 +31,7 @@ $statusLabel = LETTING_STATUSES[$card['letting_status']] ?? '';
       <a href="<?= e(url('/property/' . $card['slug'])) ?>"><?= e($card['title']) ?></a>
     </h3>
 
-    <p class="card__location"><?= e(trim($card['city'] . ' ' . $card['postcode'])) ?></p>
+    <p class="card__location"><?= e(format_address($card, false)) ?></p>
 
     <?php if ($card['summary'] !== ''): ?>
       <p class="card__summary"><?= e(excerpt($card['summary'], 115)) ?></p>
@@ -44,7 +44,7 @@ $statusLabel = LETTING_STATUSES[$card['letting_status']] ?? '';
     </div>
 
     <div class="card__foot">
-      <span class="price"><?= e(money((int)$card['price_pcm'])) ?> <span><?= e(rent_period()) ?></span></span>
+      <span class="price"><?= e(money((int)$card['monthly_rent'])) ?> <span><?= e(rent_period()) ?></span></span>
       <a href="<?= e(url('/property/' . $card['slug'])) ?>">View details</a>
     </div>
   </div>

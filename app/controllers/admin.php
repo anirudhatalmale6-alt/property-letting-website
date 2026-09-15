@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin area: sign in, listings, enquiries, fees, text pages and settings.
+ * Admin area: sign in, listings, inquiries, fees, text pages and settings.
  *
  * Every handler except the login pages starts with require_admin(), and every
  * handler that changes data starts with csrf_check().
@@ -44,7 +44,7 @@ function admin_login_submit(): void
     if (!auth_attempt($username, $password)) {
         login_attempts_record(client_ip());
         // Deliberately vague: it does not say which of the two was wrong.
-        admin_login_form(['form' => 'Those details were not recognised.']);
+        admin_login_form(['form' => 'Those details were not recognized.']);
         return;
     }
 
@@ -71,16 +71,16 @@ function admin_dashboard(): void
 {
     require_admin();
 
-    $counts = enquiries_count_by_status();
+    $counts = inquiries_count_by_status();
 
     view('admin/dashboard', [
         'title'        => 'Dashboard',
-        'liveCount'    => (int)db()->query("SELECT COUNT(*) FROM properties WHERE is_archived = 0 AND letting_status = 'available'")->fetchColumn(),
-        'letCount'     => (int)db()->query("SELECT COUNT(*) FROM properties WHERE is_archived = 0 AND letting_status != 'available'")->fetchColumn(),
+        'liveCount'    => (int)db()->query("SELECT COUNT(*) FROM properties WHERE is_archived = 0 AND listing_status = 'available'")->fetchColumn(),
+        'letCount'     => (int)db()->query("SELECT COUNT(*) FROM properties WHERE is_archived = 0 AND listing_status != 'available'")->fetchColumn(),
         'archivedCount'=> (int)db()->query('SELECT COUNT(*) FROM properties WHERE is_archived = 1')->fetchColumn(),
-        'enquiryCounts'=> $counts,
-        'recent'       => enquiries_list('', '', 6),
-        'retentionDue' => enquiries_past_retention(),
+        'inquiryCounts'=> $counts,
+        'recent'       => inquiries_list('', '', 6),
+        'retentionDue' => inquiries_past_retention(),
     ], 'admin/layout');
 }
 
@@ -98,13 +98,14 @@ function admin_properties(): void
     $where  = [$show === 'archived' ? 'p.is_archived = 1' : 'p.is_archived = 0'];
     $params = [];
     if ($search !== '') {
-        $where[] = '(p.title LIKE :q OR p.reference LIKE :q OR p.city LIKE :q OR p.postcode LIKE :q)';
+        $where[] = '(p.title LIKE :q OR p.reference LIKE :q OR p.city LIKE :q
+                     OR p.state LIKE :q OR p.zip_code LIKE :q)';
         $params[':q'] = '%' . $search . '%';
     }
 
     $sql = 'SELECT p.*,
                    (SELECT COUNT(*) FROM property_images i WHERE i.property_id = p.id) AS image_count,
-                   (SELECT COUNT(*) FROM enquiries q WHERE q.property_id = p.id) AS enquiry_count,
+                   (SELECT COUNT(*) FROM inquiries q WHERE q.property_id = p.id) AS inquiry_count,
                    (SELECT filename FROM property_images i WHERE i.property_id = p.id
                      ORDER BY i.sort_order, i.id LIMIT 1) AS cover_image
             FROM properties p
@@ -150,41 +151,60 @@ function admin_property_save(?int $id = null): void
     }
 
     $data = [
-        'title'            => input('title'),
-        'summary'          => input('summary'),
-        'description'      => input('description'),
-        'property_type'    => input('property_type', 'Flat'),
-        'letting_status'   => input('letting_status', 'available'),
-        'bedrooms'         => input_int('bedrooms'),
-        'bathrooms'        => input_int('bathrooms'),
-        'price_pcm'        => input_int('price_pcm'),
-        'deposit'          => input_int('deposit'),
-        'address_line'     => input('address_line'),
-        'city'             => input('city'),
-        'postcode'         => input('postcode'),
-        'available_from'   => input('available_from'),
-        'furnished'        => input('furnished', 'Unfurnished'),
-        'epc_rating'       => strtoupper(input('epc_rating')),
-        'council_tax_band' => strtoupper(input('council_tax_band')),
-        'features'         => implode("\n", lines(input('features'))),
-        'is_featured'      => input('is_featured') === '1' ? 1 : 0,
+        'title'              => input('title'),
+        'summary'            => input('summary'),
+        'description'        => input('description'),
+        'property_type'      => input('property_type', 'Apartment'),
+        'listing_status'     => input('listing_status', 'available'),
+        'bedrooms'           => input_int('bedrooms'),
+        'bathrooms'          => input_int('bathrooms'),
+        'monthly_rent'       => input_int('monthly_rent'),
+        'security_deposit'   => input_int('security_deposit'),
+        'address_line'       => input('address_line'),
+        'city'               => input('city'),
+        'state'              => strtoupper(input('state')),
+        'zip_code'           => input('zip_code'),
+        'available_from'     => input('available_from'),
+        'furnished'          => input('furnished', 'Unfurnished'),
+        'year_built'         => input('year_built'),
+        'parking'            => input('parking'),
+        'pets'               => input('pets'),
+        'lease_term'         => input('lease_term'),
+        'utilities_included' => input('utilities_included'),
+        'features'           => implode("\n", lines(input('features'))),
+        'is_featured'        => input('is_featured') === '1' ? 1 : 0,
     ];
 
     $errors = [];
     if ($data['title'] === '') {
         $errors['title'] = 'A property needs a title — this is the headline shown on the listing.';
     }
-    if ($data['price_pcm'] <= 0) {
-        $errors['price_pcm'] = 'Please enter the monthly rent.';
+    if ($data['monthly_rent'] <= 0) {
+        $errors['monthly_rent'] = 'Please enter the monthly rent.';
     }
     if ($data['city'] === '') {
-        $errors['city'] = 'Please enter the town or city.';
+        $errors['city'] = 'Please enter the city.';
+    }
+    if ($data['state'] !== '' && !isset(US_STATES[$data['state']])) {
+        $errors['state'] = 'Please choose a state from the list.';
+    }
+    if ($data['zip_code'] !== '' && !preg_match('/^\d{5}(-\d{4})?$/', $data['zip_code'])) {
+        $errors['zip_code'] = 'A ZIP code looks like 07042, or 07042-1234.';
+    }
+    if ($data['pets'] !== '' && !in_array($data['pets'], PETS_OPTIONS, true)) {
+        $errors['pets'] = 'Please choose a pet policy from the list.';
+    }
+    if ($data['lease_term'] !== '' && !in_array($data['lease_term'], LEASE_TERMS, true)) {
+        $errors['lease_term'] = 'Please choose a lease term from the list.';
+    }
+    if ($data['year_built'] !== '' && !preg_match('/^\d{4}$/', $data['year_built'])) {
+        $errors['year_built'] = 'Please give the year as four digits, such as 1928.';
     }
     if (!in_array($data['property_type'], PROPERTY_TYPES, true)) {
         $errors['property_type'] = 'Please choose a property type from the list.';
     }
-    if (!isset(LETTING_STATUSES[$data['letting_status']])) {
-        $errors['letting_status'] = 'Please choose a letting status from the list.';
+    if (!isset(LISTING_STATUSES[$data['listing_status']])) {
+        $errors['listing_status'] = 'Please choose a listing status from the list.';
     }
     if (!in_array($data['furnished'], FURNISHED_OPTIONS, true)) {
         $errors['furnished'] = 'Please choose a furnishing option from the list.';
@@ -370,82 +390,82 @@ function admin_property_delete(int $id): void
 }
 
 // ---------------------------------------------------------------------------
-// Enquiries
+// Inquiries
 // ---------------------------------------------------------------------------
 
-function admin_enquiries(): void
+function admin_inquiries(): void
 {
     require_admin();
 
     $status = input('status');
     $search = input('q');
 
-    view('admin/enquiries', [
-        'title'     => 'Enquiries',
-        'enquiries' => enquiries_list($status, $search, 200),
+    view('admin/inquiries', [
+        'title'     => 'Inquiries',
+        'inquiries' => inquiries_list($status, $search, 200),
         'status'    => $status,
         'search'    => $search,
-        'counts'    => enquiries_count_by_status(),
+        'counts'    => inquiries_count_by_status(),
     ], 'admin/layout');
 }
 
-function admin_enquiry_view(int $id): void
+function admin_inquiry_view(int $id): void
 {
     require_admin();
 
-    $enquiry = enquiry_find($id);
-    if (!$enquiry) {
-        not_found('That enquiry no longer exists.');
+    $inquiry = inquiry_find($id);
+    if (!$inquiry) {
+        not_found('That inquiry no longer exists.');
     }
 
-    // Opening a new enquiry marks it read, so the "new" badge reflects what
+    // Opening a new inquiry marks it read, so the "new" badge reflects what
     // has actually been looked at.
-    if ($enquiry['status'] === 'new') {
-        db()->prepare('UPDATE enquiries SET status = ? WHERE id = ?')->execute(['read', $id]);
-        $enquiry['status'] = 'read';
+    if ($inquiry['status'] === 'new') {
+        db()->prepare('UPDATE inquiries SET status = ? WHERE id = ?')->execute(['read', $id]);
+        $inquiry['status'] = 'read';
     }
 
-    view('admin/enquiry_view', [
-        'title'   => 'Enquiry ' . $enquiry['reference'],
-        'enquiry' => $enquiry,
+    view('admin/inquiry_view', [
+        'title'   => 'Inquiry ' . $inquiry['reference'],
+        'inquiry' => $inquiry,
     ], 'admin/layout');
 }
 
-function admin_enquiry_update(int $id): void
+function admin_inquiry_update(int $id): void
 {
     require_admin();
     csrf_check();
 
-    if (!enquiry_find($id)) {
+    if (!inquiry_find($id)) {
         not_found();
     }
 
     $status = input('status', 'read');
-    if (!isset(ENQUIRY_STATUSES[$status])) {
+    if (!isset(INQUIRY_STATUSES[$status])) {
         $status = 'read';
     }
 
-    db()->prepare('UPDATE enquiries SET status = ?, admin_notes = ? WHERE id = ?')
+    db()->prepare('UPDATE inquiries SET status = ?, admin_notes = ? WHERE id = ?')
         ->execute([$status, input('admin_notes'), $id]);
 
-    flash('success', 'Enquiry updated.');
-    redirect('/admin/enquiries/' . $id);
+    flash('success', 'Inquiry updated.');
+    redirect('/admin/inquiries/' . $id);
 }
 
-function admin_enquiry_delete(int $id): void
+function admin_inquiry_delete(int $id): void
 {
     require_admin();
     csrf_check();
 
-    $enquiry = enquiry_find($id);
-    if (!$enquiry) {
+    $inquiry = inquiry_find($id);
+    if (!$inquiry) {
         not_found();
     }
 
-    db()->prepare('DELETE FROM enquiries WHERE id = ?')->execute([$id]);
+    db()->prepare('DELETE FROM inquiries WHERE id = ?')->execute([$id]);
 
-    flash('success', 'Enquiry ' . $enquiry['reference'] . ' deleted. The personal data it contained is gone.');
-    redirect('/admin/enquiries');
+    flash('success', 'Inquiry ' . $inquiry['reference'] . ' deleted. The personal data it contained is gone.');
+    redirect('/admin/inquiries');
 }
 
 // ---------------------------------------------------------------------------
@@ -578,12 +598,15 @@ function admin_editable_settings(): array
         'office_hours'       => ['Opening hours', 'textarea', 'One line per day or group of days.'],
         'contact_intro'      => ['Contact page introduction', 'textarea', ''],
         'map_embed'          => ['Google Maps embed link', 'text', 'Optional. In Google Maps choose Share, then Embed a map, and paste only the src="..." link from the code it gives you.'],
-        'enquiry_notify_email' => ['Send enquiry alerts to', 'text', 'Leave blank to use the contact email address above.'],
-        'currency_symbol'    => ['Currency symbol', 'text', 'Used in front of every price on the site — £, $, € and so on.'],
-        'rent_period_label'  => ['Rent period wording', 'text', 'Shown after each rent figure. "pcm", "per month" or "/mo".'],
+        'inquiry_notify_email' => ['Send inquiry alerts to', 'text', 'Leave blank to use the contact email address above.'],
+        'currency_symbol'    => ['Currency symbol', 'text', 'Used in front of every price on the site — $, £, € and so on.'],
+        'rent_period_label'  => ['Rent period wording', 'text', 'Shown after each rent figure. "/mo", "per month" or "pcm".'],
+        'date_format'        => ['Date format', 'text', 'PHP date format. "F j, Y" gives October 1, 2026. "j F Y" gives 1 October 2026.'],
+        'default_state'      => ['Default state', 'text', 'Pre-selected on the property form, so you are not picking it every time. Two letters, such as NJ.'],
+        'fair_housing_note'  => ['Fair housing statement', 'textarea', 'Shown in the footer of every page. Clear it to remove the line entirely.'],
         'footer_note'        => ['Footer note', 'textarea', 'The small print at the very bottom of every page.'],
-        'primary_colour'     => ['Main colour', 'colour', 'Used for headings, buttons and links.'],
-        'theme_accent'       => ['Accent colour', 'colour', 'Used sparingly for highlights and prices.'],
+        'primary_color'     => ['Main color', 'color', 'Used for headings, buttons and links.'],
+        'theme_accent'       => ['Accent color', 'color', 'Used sparingly for highlights and prices.'],
     ];
 }
 
@@ -630,8 +653,8 @@ function admin_settings_save(): void
         }
         $value = trim((string)$_POST[$key]);
 
-        if ($field[1] === 'colour' && !preg_match('/^#[0-9a-fA-F]{6}$/', $value)) {
-            flash('error', $field[0] . ' must be a colour such as #1f5f5b — that one was left unchanged.');
+        if ($field[1] === 'color' && !preg_match('/^#[0-9a-fA-F]{6}$/', $value)) {
+            flash('error', $field[0] . ' must be a color such as #062952 — that one was left unchanged.');
             continue;
         }
         if ($key === 'map_embed' && $value !== '') {
@@ -642,7 +665,7 @@ function admin_settings_save(): void
                 continue;
             }
         }
-        if (in_array($key, ['contact_email', 'enquiry_notify_email'], true) && $value !== '' && !valid_email($value)) {
+        if (in_array($key, ['contact_email', 'inquiry_notify_email'], true) && $value !== '' && !valid_email($value)) {
             flash('error', $field[0] . ' does not look like a valid email address — it was left unchanged.');
             continue;
         }

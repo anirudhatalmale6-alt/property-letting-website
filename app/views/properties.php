@@ -19,7 +19,7 @@ $queryWith = function (array $changes) use ($filters, $sort): array {
         'min_price' => $filters['min_price'] ?: '',
         'max_price' => $filters['max_price'] ?: '',
         'furnished' => $filters['furnished'],
-        'include_let' => $filters['include_let'] ? '1' : '',
+        'include_rented' => $filters['include_rented'] ? '1' : '',
         'sort'      => $sort === 'newest' ? '' : $sort,
     ], fn($v) => $v !== '' && $v !== null);
 
@@ -42,12 +42,12 @@ if ($filters['bedrooms'])        { $activeChips['bedrooms'] = $filters['bedrooms
 if ($filters['min_price'])       { $activeChips['min_price'] = 'From ' . money($filters['min_price']); }
 if ($filters['max_price'])       { $activeChips['max_price'] = 'Up to ' . money($filters['max_price']); }
 if ($filters['furnished'] !== '') { $activeChips['furnished'] = $filters['furnished']; }
-if ($filters['include_let'])     { $activeChips['include_let'] = 'Including let properties'; }
+if ($filters['include_rented'])     { $activeChips['include_rented'] = 'Including rented properties'; }
 ?>
 
 <section class="page-head">
   <div class="wrap">
-    <h1>Properties to let</h1>
+    <h1>Properties for rent</h1>
     <p>Everything we currently have available. Use the filters to narrow it down.</p>
   </div>
 </section>
@@ -59,7 +59,7 @@ if ($filters['include_let'])     { $activeChips['include_let'] = 'Including let 
       <div class="searchbar__grid">
         <div class="field mb-0">
           <label for="q">Search</label>
-          <input type="search" id="q" name="q" value="<?= e($filters['q']) ?>" placeholder="Town, postcode or reference">
+          <input type="search" id="q" name="q" value="<?= e($filters['q']) ?>" placeholder="City, ZIP or reference">
         </div>
 
         <div class="field mb-0">
@@ -130,8 +130,8 @@ if ($filters['include_let'])     { $activeChips['include_let'] = 'Including let 
       </div>
 
       <div class="checkbox" style="margin-top: 16px;">
-        <input type="checkbox" id="include_let" name="include_let" value="1" <?= $filters['include_let'] ? 'checked' : '' ?>>
-        <label for="include_let">Also show properties that are already let (useful to see the kind of homes we manage)</label>
+        <input type="checkbox" id="include_rented" name="include_rented" value="1" <?= $filters['include_rented'] ? 'checked' : '' ?>>
+        <label for="include_rented">Also show properties that are already rented (useful to see the kind of homes we manage)</label>
       </div>
     </form>
 

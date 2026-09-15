@@ -1,6 +1,6 @@
 <?php
 /**
- * Contact page and general enquiry form.
+ * Contact page and general inquiry form.
  *
  * @var array $errors
  */
@@ -71,7 +71,7 @@ $map = setting('map_embed');
           </div>
 
           <button class="btn" type="submit">Send message</button>
-          <p class="field__hint">We aim to reply within one working day.</p>
+          <p class="field__hint">We aim to reply within one business day.</p>
         </form>
       </div>
 

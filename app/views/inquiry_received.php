@@ -1,13 +1,13 @@
 <?php
-/** Shown after an enquiry is submitted, via a redirect so a refresh cannot resend it. */
+/** Shown after an inquiry is submitted, via a redirect so a refresh cannot resend it. */
 ?>
 
 <section class="section">
   <div class="wrap" style="max-width: 640px; text-align: center; padding: 40px 20px;">
-    <p class="hero__eyebrow">Enquiry sent</p>
+    <p class="hero__eyebrow">Inquiry sent</p>
     <h1>Thank you — we have it</h1>
     <p class="text-soft">
-      Your enquiry has reached us and we will come back to you within one working day.
+      Your inquiry has reached us and we will come back to you within one business day.
       A confirmation has been sent to the email address you gave, with your reference number on it.
     </p>
     <p class="text-soft">

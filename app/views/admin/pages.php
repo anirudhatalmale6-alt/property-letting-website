@@ -35,7 +35,7 @@
             <td class="text-small text-soft nowrap"><?= e(pretty_datetime($page['updated_at'])) ?></td>
             <td class="table__actions">
               <a class="btn btn--ghost btn--small" href="<?= e(url('/admin/pages/' . $page['slug'])) ?>">Edit</a>
-              <?php if (in_array($page['slug'], ['about', 'privacy', 'terms'], true)): ?>
+              <?php if (in_array($page['slug'], ['about', 'privacy', 'terms', 'disclosures'], true)): ?>
                 <a class="btn btn--ghost btn--small" href="<?= e(url('/' . $page['slug'])) ?>" target="_blank" rel="noopener">View</a>
               <?php elseif ($page['slug'] === 'fees-notes'): ?>
                 <a class="btn btn--ghost btn--small" href="<?= e(url('/pricing')) ?>" target="_blank" rel="noopener">View</a>
@@ -54,8 +54,8 @@
   </div>
   <p class="text-soft text-small mb-0">
     The privacy policy that ships with the site describes what this website actually does: it collects
-    enquiry details, uses them only to reply, and keeps them for
-    <?= (int)config('enquiry_retention_days') ?> days. If you change how you use that data — adding a
+    inquiry details, uses them only to reply, and keeps them for
+    <?= (int)config('inquiry_retention_days') ?> days. If you change how you use that data — adding a
     mailing list, for instance — update this page to match, or it stops being accurate.
   </p>
 </div>

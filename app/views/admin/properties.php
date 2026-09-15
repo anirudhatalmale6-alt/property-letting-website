@@ -26,7 +26,7 @@
   <?php endif; ?>
   <div class="field">
     <label for="q">Search</label>
-    <input type="search" id="q" name="q" value="<?= e($search) ?>" placeholder="Title, reference, town or postcode">
+    <input type="search" id="q" name="q" value="<?= e($search) ?>" placeholder="Title, reference, city or ZIP">
   </div>
   <button class="btn btn--ghost" type="submit">Search</button>
   <?php if ($search !== ''): ?>
@@ -57,7 +57,7 @@
             <th scope="col">Rent</th>
             <th scope="col">Beds</th>
             <th scope="col">Status</th>
-            <th scope="col">Enquiries</th>
+            <th scope="col">Inquiries</th>
             <th scope="col"><span class="sr-only">Actions</span></th>
           </tr>
         </thead>
@@ -77,22 +77,22 @@
                   <?php if ($p['is_featured']): ?><span class="tag tag--featured">Featured</span><?php endif; ?>
                 </div>
                 <div class="table__sub">
-                  <?= e($p['reference']) ?> &middot; <?= e(trim($p['city'] . ' ' . $p['postcode'])) ?>
+                  <?= e($p['reference']) ?> &middot; <?= e(format_address($p, false)) ?>
                   &middot; <?= (int)$p['image_count'] ?> photo<?= (int)$p['image_count'] === 1 ? '' : 's' ?>
                 </div>
               </td>
-              <td class="nowrap"><?= e(money((int)$p['price_pcm'])) ?> <span class="text-small text-soft"><?= e(rent_period()) ?></span></td>
+              <td class="nowrap"><?= e(money((int)$p['monthly_rent'])) ?> <span class="text-small text-soft"><?= e(rent_period()) ?></span></td>
               <td><?= (int)$p['bedrooms'] ?></td>
               <td>
                 <?php if ($p['is_archived']): ?>
                   <span class="tag tag--archived">Archived</span>
                 <?php else: ?>
-                  <span class="tag tag--<?= e($p['letting_status']) ?>"><?= e(LETTING_STATUSES[$p['letting_status']] ?? '') ?></span>
+                  <span class="tag tag--<?= e($p['listing_status']) ?>"><?= e(LISTING_STATUSES[$p['listing_status']] ?? '') ?></span>
                 <?php endif; ?>
               </td>
               <td>
-                <?php if ((int)$p['enquiry_count'] > 0): ?>
-                  <a href="<?= e(url('/admin/enquiries', ['q' => $p['reference']])) ?>"><?= (int)$p['enquiry_count'] ?></a>
+                <?php if ((int)$p['inquiry_count'] > 0): ?>
+                  <a href="<?= e(url('/admin/inquiries', ['q' => $p['reference']])) ?>"><?= (int)$p['inquiry_count'] ?></a>
                 <?php else: ?>
                   <span class="text-soft">—</span>
                 <?php endif; ?>

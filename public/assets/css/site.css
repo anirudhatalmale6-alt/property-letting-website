@@ -1,8 +1,8 @@
 /* ---------------------------------------------------------------------------
    Public site styles.
 
-   The two brand colours come from the admin Settings screen and are injected
-   as --primary and --accent in the page head, so the client can recolour the
+   The two brand colors come from the admin Settings screen and are injected
+   as --primary and --accent in the page head, so the client can recolor the
    whole site without touching this file.
    --------------------------------------------------------------------------- */
 
@@ -23,7 +23,7 @@
   --blue-wash:  #d7e7f7;   /* the strongest light blue used, top of the hero */
   --footer-bg:  #061f3d;
 
-  /* Gold is a fill colour, not a text colour: at full strength it fails a
+  /* Gold is a fill color, not a text color: at full strength it fails a
      contrast check against white. Small gold text uses this darkened version
      instead, derived from whatever accent is set in the admin. */
   --accent-ink: #7b5c1f;
@@ -207,7 +207,7 @@ img { max-width: 100%; display: block; }
 }
 
 /* A soft navy wash in the top-right corner, so the band reads as a deliberate
-   brand colour rather than an off-white. It sits behind the text and fades out
+   brand color rather than an off-white. It sits behind the text and fades out
    well before it, so contrast is unaffected. */
 .hero::after {
   content: "";
@@ -326,8 +326,8 @@ select {
   box-shadow: 0 1px 3px rgba(0,0,0,.14);
 }
 .badge--available   { background: #1f7a47; color: #fff; }
-.badge--under_offer { background: var(--accent); color: #fff; }
-.badge--let         { background: #667b93; color: #fff; }
+.badge--pending { background: var(--accent); color: #fff; }
+.badge--rented         { background: #667b93; color: #fff; }
 .badge--featured    { left: auto; right: 14px; background: var(--ink); color: #fff; }
 
 .card__body { padding: 20px 22px 22px; display: flex; flex-direction: column; flex: 1; }
@@ -412,10 +412,17 @@ select {
 
 .spec-list {
   list-style: none; margin: 0 0 30px; padding: 0;
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px;
-  background: var(--line); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  background: var(--paper); border: 1px solid var(--line);
+  border-radius: var(--radius); overflow: hidden;
 }
-.spec-list li { background: var(--paper); padding: 14px 16px; }
+/* Separators are drawn on the cells themselves rather than by letting a
+   background show through gaps: an incomplete last row would otherwise leave
+   grey blocks where a property simply has no value for that field. */
+.spec-list li {
+  padding: 14px 16px;
+  box-shadow: 1px 0 0 var(--line), 0 1px 0 var(--line);
+}
 .spec-list dt, .spec-list .spec__label {
   font-size: .75rem; text-transform: uppercase; letter-spacing: .07em; color: var(--ink-faint); margin-bottom: 3px;
 }
@@ -492,6 +499,12 @@ select {
 .site-footer__inner { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 36px; padding-bottom: 44px; }
 .site-footer__heading { font-size: .8rem; text-transform: uppercase; letter-spacing: .1em; color: #8399b5; margin-bottom: 14px; font-family: var(--font-body); font-weight: 600; }
 .site-footer__block div { padding: 3px 0; }
+.site-footer__fair {
+  border-top: 1px solid #143154; padding-top: 20px; padding-bottom: 4px;
+  color: #93a6bd; font-size: .82rem; max-width: 90ch;
+}
+.site-footer__fair p { margin: 0; }
+
 .site-footer__legal {
   border-top: 1px solid #143154; padding-top: 22px; padding-bottom: 28px;
   display: flex; flex-wrap: wrap; gap: 8px 32px; justify-content: space-between;

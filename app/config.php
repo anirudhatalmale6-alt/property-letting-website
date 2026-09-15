@@ -45,9 +45,9 @@ $config = [
     'login_lockout_secs'=> 900,
 
     // --- GDPR ------------------------------------------------------------
-    // Enquiries older than this are flagged in the admin as due for deletion.
+    // Inquiries older than this are flagged in the admin as due for deletion.
     // Nothing is ever auto-deleted; you decide.
-    'enquiry_retention_days' => 730,
+    'inquiry_retention_days' => 730,
 ];
 
 $localFile = __DIR__ . '/config.local.php';

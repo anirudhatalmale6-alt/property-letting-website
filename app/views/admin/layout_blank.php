@@ -15,7 +15,7 @@
 <title><?= e($title) ?> — <?= e(setting('site_name')) ?></title>
 <link rel="stylesheet" href="<?= e(asset('assets/css/admin.css')) ?>">
 </head>
-<body class="admin admin--centred">
+<body class="admin admin--centered">
   <?php foreach (take_flashes() as $flash): ?>
     <div class="alert alert--<?= e($flash['type']) ?>" style="max-width: 400px; width: 100%;"><?= e($flash['message']) ?></div>
   <?php endforeach; ?>

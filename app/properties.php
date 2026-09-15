@@ -1,6 +1,6 @@
 <?php
 /**
- * Property and enquiry queries.
+ * Property and inquiry queries.
  *
  * Every query is a prepared statement with bound parameters — no user input
  * is ever concatenated into SQL. The filter builder below assembles the WHERE
@@ -9,17 +9,53 @@
 
 declare(strict_types=1);
 
-const LETTING_STATUSES = [
-    'available'   => 'Available',
-    'under_offer' => 'Under offer',
-    'let'         => 'Let',
+const LISTING_STATUSES = [
+    'available' => 'Available',
+    'pending'   => 'Application pending',
+    'rented'    => 'Rented',
 ];
 
-const PROPERTY_TYPES = ['Flat', 'Apartment', 'House', 'Cottage', 'Bungalow', 'Studio', 'Maisonette'];
+const PROPERTY_TYPES = ['Apartment', 'House', 'Condo', 'Townhouse', 'Duplex', 'Studio', 'Multi-family'];
 
-const FURNISHED_OPTIONS = ['Unfurnished', 'Part furnished', 'Furnished'];
+const FURNISHED_OPTIONS = ['Unfurnished', 'Partially furnished', 'Furnished'];
 
-const ENQUIRY_STATUSES = [
+const PETS_OPTIONS = ['', 'No pets', 'Cats only', 'Dogs only', 'Cats and dogs', 'Case by case'];
+
+const LEASE_TERMS = ['', '12 months', '6 months', '24 months', 'Month to month', 'Flexible'];
+
+/** Two-letter USPS codes, for the address field on the property form. */
+const US_STATES = [
+    'AL' => 'Alabama', 'AK' => 'Alaska', 'AZ' => 'Arizona', 'AR' => 'Arkansas',
+    'CA' => 'California', 'CO' => 'Colorado', 'CT' => 'Connecticut', 'DE' => 'Delaware',
+    'DC' => 'District of Columbia', 'FL' => 'Florida', 'GA' => 'Georgia', 'HI' => 'Hawaii',
+    'ID' => 'Idaho', 'IL' => 'Illinois', 'IN' => 'Indiana', 'IA' => 'Iowa',
+    'KS' => 'Kansas', 'KY' => 'Kentucky', 'LA' => 'Louisiana', 'ME' => 'Maine',
+    'MD' => 'Maryland', 'MA' => 'Massachusetts', 'MI' => 'Michigan', 'MN' => 'Minnesota',
+    'MS' => 'Mississippi', 'MO' => 'Missouri', 'MT' => 'Montana', 'NE' => 'Nebraska',
+    'NV' => 'Nevada', 'NH' => 'New Hampshire', 'NJ' => 'New Jersey', 'NM' => 'New Mexico',
+    'NY' => 'New York', 'NC' => 'North Carolina', 'ND' => 'North Dakota', 'OH' => 'Ohio',
+    'OK' => 'Oklahoma', 'OR' => 'Oregon', 'PA' => 'Pennsylvania', 'RI' => 'Rhode Island',
+    'SC' => 'South Carolina', 'SD' => 'South Dakota', 'TN' => 'Tennessee', 'TX' => 'Texas',
+    'UT' => 'Utah', 'VT' => 'Vermont', 'VA' => 'Virginia', 'WA' => 'Washington',
+    'WV' => 'West Virginia', 'WI' => 'Wisconsin', 'WY' => 'Wyoming',
+];
+
+/**
+ * "123 Maple Avenue, Montclair, NJ 07042" — assembled from whichever parts are
+ * filled in, with the comma before the state only where a city precedes it.
+ */
+function format_address(array $p, bool $withStreet = true): string
+{
+    $cityState = trim(($p['city'] ?? '') . ', ' . ($p['state'] ?? ''), ' ,');
+    $cityState = trim($cityState . ' ' . ($p['zip_code'] ?? ''));
+
+    if (!$withStreet) {
+        return $cityState;
+    }
+    return trim(trim($p['address_line'] ?? '') . ', ' . $cityState, ' ,');
+}
+
+const INQUIRY_STATUSES = [
     'new'     => 'New',
     'read'    => 'Read',
     'replied' => 'Replied',
@@ -50,28 +86,28 @@ function property_filter_sql(array $f): array
         $params[':bedrooms'] = (int)$f['bedrooms'];
     }
     if (!empty($f['min_price'])) {
-        $where[] = 'p.price_pcm >= :min_price';
+        $where[] = 'p.monthly_rent >= :min_price';
         $params[':min_price'] = (int)$f['min_price'];
     }
     if (!empty($f['max_price'])) {
-        $where[] = 'p.price_pcm <= :max_price';
+        $where[] = 'p.monthly_rent <= :max_price';
         $params[':max_price'] = (int)$f['max_price'];
     }
     if (!empty($f['furnished']) && in_array($f['furnished'], FURNISHED_OPTIONS, true)) {
         $where[] = 'p.furnished = :furnished';
         $params[':furnished'] = $f['furnished'];
     }
-    if (!empty($f['status']) && isset(LETTING_STATUSES[$f['status']])) {
-        $where[] = 'p.letting_status = :status';
+    if (!empty($f['status']) && isset(LISTING_STATUSES[$f['status']])) {
+        $where[] = 'p.listing_status = :status';
         $params[':status'] = $f['status'];
-    } elseif (empty($f['include_let'])) {
-        // By default the public list hides properties that are already let.
-        $where[] = "p.letting_status != 'let'";
+    } elseif (empty($f['include_rented'])) {
+        // By default the public list hides properties that are already rented.
+        $where[] = "p.listing_status != 'rented'";
     }
     if (!empty($f['q'])) {
         $where[] = '(p.title LIKE :q OR p.summary LIKE :q OR p.description LIKE :q
-                     OR p.city LIKE :q OR p.postcode LIKE :q OR p.address_line LIKE :q
-                     OR p.reference LIKE :q)';
+                     OR p.city LIKE :q OR p.state LIKE :q OR p.zip_code LIKE :q
+                     OR p.address_line LIKE :q OR p.reference LIKE :q)';
         $params[':q'] = '%' . $f['q'] . '%';
     }
 
@@ -80,9 +116,9 @@ function property_filter_sql(array $f): array
 
 const PROPERTY_SORTS = [
     'newest'     => 'p.created_at DESC',
-    'price_asc'  => 'p.price_pcm ASC',
-    'price_desc' => 'p.price_pcm DESC',
-    'beds_desc'  => 'p.bedrooms DESC, p.price_pcm ASC',
+    'price_asc'  => 'p.monthly_rent ASC',
+    'price_desc' => 'p.monthly_rent DESC',
+    'beds_desc'  => 'p.bedrooms DESC, p.monthly_rent ASC',
 ];
 
 function properties_search(array $filters, string $sort = 'newest', int $limit = 24, int $offset = 0): array
@@ -182,14 +218,14 @@ function unique_property_slug(string $title, ?int $ignoreId = null): string
 }
 
 // ---------------------------------------------------------------------------
-// Enquiries
+// Inquiries
 // ---------------------------------------------------------------------------
 
-function enquiry_create(array $data): int
+function inquiry_create(array $data): int
 {
-    $reference = 'ENQ-' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(2)));
+    $reference = 'INQ-' . date('Ymd') . '-' . strtoupper(bin2hex(random_bytes(2)));
 
-    $sql = 'INSERT INTO enquiries
+    $sql = 'INSERT INTO inquiries
             (reference, property_id, kind, name, email, phone, move_in_date, message,
              status, consent, source_ip, created_at)
             VALUES (:reference, :property_id, :kind, :name, :email, :phone, :move_in_date,
@@ -213,10 +249,10 @@ function enquiry_create(array $data): int
     return (int)db()->lastInsertId();
 }
 
-function enquiry_find(int $id): ?array
+function inquiry_find(int $id): ?array
 {
     $sql = 'SELECT e.*, p.title AS property_title, p.slug AS property_slug, p.reference AS property_reference
-            FROM enquiries e
+            FROM inquiries e
             LEFT JOIN properties p ON p.id = e.property_id
             WHERE e.id = ?';
     $stmt = db()->prepare($sql);
@@ -224,12 +260,12 @@ function enquiry_find(int $id): ?array
     return $stmt->fetch() ?: null;
 }
 
-function enquiries_list(string $status = '', string $search = '', int $limit = 100): array
+function inquiries_list(string $status = '', string $search = '', int $limit = 100): array
 {
     $where  = ['1=1'];
     $params = [];
 
-    if ($status !== '' && isset(ENQUIRY_STATUSES[$status])) {
+    if ($status !== '' && isset(INQUIRY_STATUSES[$status])) {
         $where[] = 'e.status = :status';
         $params[':status'] = $status;
     }
@@ -240,7 +276,7 @@ function enquiries_list(string $status = '', string $search = '', int $limit = 1
     }
 
     $sql = 'SELECT e.*, p.title AS property_title, p.reference AS property_reference
-            FROM enquiries e
+            FROM inquiries e
             LEFT JOIN properties p ON p.id = e.property_id
             WHERE ' . implode(' AND ', $where) . '
             ORDER BY e.created_at DESC
@@ -256,24 +292,24 @@ function enquiries_list(string $status = '', string $search = '', int $limit = 1
     return $stmt->fetchAll();
 }
 
-function enquiries_count_by_status(): array
+function inquiries_count_by_status(): array
 {
-    $counts = array_fill_keys(array_keys(ENQUIRY_STATUSES), 0);
-    foreach (db()->query('SELECT status, COUNT(*) c FROM enquiries GROUP BY status') as $row) {
+    $counts = array_fill_keys(array_keys(INQUIRY_STATUSES), 0);
+    foreach (db()->query('SELECT status, COUNT(*) c FROM inquiries GROUP BY status') as $row) {
         $counts[$row['status']] = (int)$row['c'];
     }
     return $counts;
 }
 
 /**
- * Enquiries past the retention period set in config. Shown in the admin so
+ * Inquiries past the retention period set in config. Shown in the admin so
  * old personal data can be cleared out — a GDPR housekeeping aid, not an
  * automatic delete.
  */
-function enquiries_past_retention(): int
+function inquiries_past_retention(): int
 {
-    $cutoff = gmdate('Y-m-d H:i:s', time() - ((int)config('enquiry_retention_days') * 86400));
-    $stmt   = db()->prepare('SELECT COUNT(*) FROM enquiries WHERE created_at < ?');
+    $cutoff = gmdate('Y-m-d H:i:s', time() - ((int)config('inquiry_retention_days') * 86400));
+    $stmt   = db()->prepare('SELECT COUNT(*) FROM inquiries WHERE created_at < ?');
     $stmt->execute([$cutoff]);
     return (int)$stmt->fetchColumn();
 }

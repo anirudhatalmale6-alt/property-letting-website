@@ -63,7 +63,7 @@ $action = $isNew ? url('/admin/properties/new') : url('/admin/properties/' . $pr
     <div class="field<?= isset($errors['title']) ? ' field--invalid' : '' ?>">
       <label for="title">Headline</label>
       <input type="text" id="title" name="title" value="<?= e($val('title')) ?>"
-             placeholder="Two-bedroom garden flat, Station Road" required>
+             placeholder="Two-bedroom apartment, Walnut Street, Montclair" required>
       <p class="field__hint">How the property is listed. Say what it is and roughly where — that is what people search for.</p>
       <?php if (isset($errors['title'])): ?><p class="field__error"><?= e($errors['title']) ?></p><?php endif; ?>
     </div>
@@ -71,7 +71,7 @@ $action = $isNew ? url('/admin/properties/new') : url('/admin/properties/' . $pr
     <div class="field">
       <label for="summary">One-line summary</label>
       <input type="text" id="summary" name="summary" value="<?= e($val('summary')) ?>"
-             placeholder="A bright ground-floor flat with its own south-facing garden.">
+             placeholder="A bright second-floor apartment with parking included.">
       <p class="field__hint">Shown under the headline on the results page. One sentence is plenty.</p>
     </div>
 
@@ -97,15 +97,15 @@ $action = $isNew ? url('/admin/properties/new') : url('/admin/properties/' . $pr
     </div>
 
     <div class="grid-4">
-      <div class="field<?= isset($errors['price_pcm']) ? ' field--invalid' : '' ?>">
-        <label for="price_pcm">Rent per month (<?= e(setting('currency_symbol', '£')) ?>)</label>
-        <input type="number" id="price_pcm" name="price_pcm" value="<?= e($val('price_pcm')) ?>" min="0" step="1" required>
-        <?php if (isset($errors['price_pcm'])): ?><p class="field__error"><?= e($errors['price_pcm']) ?></p><?php endif; ?>
+      <div class="field<?= isset($errors['monthly_rent']) ? ' field--invalid' : '' ?>">
+        <label for="monthly_rent">Rent per month (<?= e(setting('currency_symbol', '$')) ?>)</label>
+        <input type="number" id="monthly_rent" name="monthly_rent" value="<?= e($val('monthly_rent')) ?>" min="0" step="1" required>
+        <?php if (isset($errors['monthly_rent'])): ?><p class="field__error"><?= e($errors['monthly_rent']) ?></p><?php endif; ?>
       </div>
 
       <div class="field">
-        <label for="deposit">Deposit (<?= e(setting('currency_symbol', '£')) ?>)</label>
-        <input type="number" id="deposit" name="deposit" value="<?= e($val('deposit')) ?>" min="0" step="1">
+        <label for="security_deposit">Deposit (<?= e(setting('currency_symbol', '$')) ?>)</label>
+        <input type="number" id="security_deposit" name="security_deposit" value="<?= e($val('security_deposit')) ?>" min="0" step="1">
         <p class="field__hint">Capped at five weeks' rent.</p>
       </div>
 
@@ -125,7 +125,7 @@ $action = $isNew ? url('/admin/properties/new') : url('/admin/properties/' . $pr
         <label for="property_type">Property type</label>
         <select id="property_type" name="property_type">
           <?php foreach (PROPERTY_TYPES as $type): ?>
-            <option value="<?= e($type) ?>" <?= $val('property_type', 'Flat') === $type ? 'selected' : '' ?>><?= e($type) ?></option>
+            <option value="<?= e($type) ?>" <?= $val('property_type', 'Apartment') === $type ? 'selected' : '' ?>><?= e($type) ?></option>
           <?php endforeach; ?>
         </select>
       </div>
@@ -139,33 +139,48 @@ $action = $isNew ? url('/admin/properties/new') : url('/admin/properties/' . $pr
         </select>
       </div>
 
-      <div class="field<?= isset($errors['letting_status']) ? ' field--invalid' : '' ?>">
-        <label for="letting_status">Letting status</label>
-        <select id="letting_status" name="letting_status">
-          <?php foreach (LETTING_STATUSES as $key => $label): ?>
-            <option value="<?= e($key) ?>" <?= $val('letting_status', 'available') === $key ? 'selected' : '' ?>><?= e($label) ?></option>
+      <div class="field<?= isset($errors['listing_status']) ? ' field--invalid' : '' ?>">
+        <label for="listing_status">Listing status</label>
+        <select id="listing_status" name="listing_status">
+          <?php foreach (LISTING_STATUSES as $key => $label): ?>
+            <option value="<?= e($key) ?>" <?= $val('listing_status', 'available') === $key ? 'selected' : '' ?>><?= e($label) ?></option>
           <?php endforeach; ?>
         </select>
         <p class="field__hint">"Let" keeps it on the site as an example but hides it from the default search.</p>
       </div>
     </div>
 
-    <div class="grid-3">
+    <div class="grid-4">
       <div class="field">
         <label for="address_line">Street</label>
-        <input type="text" id="address_line" name="address_line" value="<?= e($val('address_line')) ?>" placeholder="Station Road">
+        <input type="text" id="address_line" name="address_line" value="<?= e($val('address_line')) ?>" placeholder="Walnut Street">
         <p class="field__hint">Street name only is fine — no need for the house number.</p>
       </div>
 
       <div class="field<?= isset($errors['city']) ? ' field--invalid' : '' ?>">
-        <label for="city">Town or city</label>
-        <input type="text" id="city" name="city" value="<?= e($val('city')) ?>" required>
+        <label for="city">City</label>
+        <input type="text" id="city" name="city" value="<?= e($val('city')) ?>" placeholder="Montclair" required>
         <?php if (isset($errors['city'])): ?><p class="field__error"><?= e($errors['city']) ?></p><?php endif; ?>
       </div>
 
-      <div class="field">
-        <label for="postcode">Postcode</label>
-        <input type="text" id="postcode" name="postcode" value="<?= e($val('postcode')) ?>">
+      <div class="field<?= isset($errors['state']) ? ' field--invalid' : '' ?>">
+        <label for="state">State</label>
+        <select id="state" name="state">
+          <option value="">—</option>
+          <?php foreach (US_STATES as $code => $name): ?>
+            <option value="<?= e($code) ?>" <?= $val('state', setting('default_state', 'NJ')) === $code ? 'selected' : '' ?>>
+              <?= e($code) ?> — <?= e($name) ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+        <?php if (isset($errors['state'])): ?><p class="field__error"><?= e($errors['state']) ?></p><?php endif; ?>
+      </div>
+
+      <div class="field<?= isset($errors['zip_code']) ? ' field--invalid' : '' ?>">
+        <label for="zip_code">ZIP code</label>
+        <input type="text" id="zip_code" name="zip_code" value="<?= e($val('zip_code')) ?>"
+               inputmode="numeric" maxlength="10" placeholder="07042">
+        <?php if (isset($errors['zip_code'])): ?><p class="field__error"><?= e($errors['zip_code']) ?></p><?php endif; ?>
       </div>
     </div>
 
@@ -174,18 +189,56 @@ $action = $isNew ? url('/admin/properties/new') : url('/admin/properties/' . $pr
         <label for="available_from">Available from</label>
         <input type="text" id="available_from" name="available_from" value="<?= e($val('available_from')) ?>"
                placeholder="2026-10-01 or Now">
-        <p class="field__hint">A date as 2026-10-01, or free text such as "Now".</p>
+        <p class="field__hint">A date as 2026-10-01, or free text such as "Now". It is shown as <?= e(date(setting('date_format', 'F j, Y'))) ?>.</p>
       </div>
 
-      <div class="field">
-        <label for="epc_rating">EPC rating</label>
-        <input type="text" id="epc_rating" name="epc_rating" value="<?= e($val('epc_rating')) ?>" maxlength="3" placeholder="C">
+      <div class="field<?= isset($errors['lease_term']) ? ' field--invalid' : '' ?>">
+        <label for="lease_term">Lease term</label>
+        <select id="lease_term" name="lease_term">
+          <?php foreach (LEASE_TERMS as $term): ?>
+            <option value="<?= e($term) ?>" <?= $val('lease_term') === $term ? 'selected' : '' ?>>
+              <?= $term === '' ? 'Not stated' : e($term) ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+        <?php if (isset($errors['lease_term'])): ?><p class="field__error"><?= e($errors['lease_term']) ?></p><?php endif; ?>
       </div>
 
-      <div class="field">
-        <label for="council_tax_band">Council tax band</label>
-        <input type="text" id="council_tax_band" name="council_tax_band" value="<?= e($val('council_tax_band')) ?>" maxlength="3" placeholder="D">
+      <div class="field<?= isset($errors['year_built']) ? ' field--invalid' : '' ?>">
+        <label for="year_built">Year built</label>
+        <input type="text" id="year_built" name="year_built" value="<?= e($val('year_built')) ?>"
+               inputmode="numeric" maxlength="4" placeholder="1928">
+        <?php if (isset($errors['year_built'])): ?><p class="field__error"><?= e($errors['year_built']) ?></p><?php endif; ?>
       </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="field">
+        <label for="parking">Parking</label>
+        <input type="text" id="parking" name="parking" value="<?= e($val('parking')) ?>"
+               placeholder="One off-street space included">
+        <p class="field__hint">Free text, because every listing describes it differently.</p>
+      </div>
+
+      <div class="field<?= isset($errors['pets']) ? ' field--invalid' : '' ?>">
+        <label for="pets">Pet policy</label>
+        <select id="pets" name="pets">
+          <?php foreach (PETS_OPTIONS as $option): ?>
+            <option value="<?= e($option) ?>" <?= $val('pets') === $option ? 'selected' : '' ?>>
+              <?= $option === '' ? 'Not stated' : e($option) ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+        <p class="field__hint">Assistance animals are not pets and are not covered by this.</p>
+        <?php if (isset($errors['pets'])): ?><p class="field__error"><?= e($errors['pets']) ?></p><?php endif; ?>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="utilities_included">Utilities</label>
+      <input type="text" id="utilities_included" name="utilities_included" value="<?= e($val('utilities_included')) ?>"
+             placeholder="Heat and hot water included. Tenant pays electric.">
+      <p class="field__hint">One of the first things people look for. Say what is included and what the tenant pays.</p>
     </div>
 
     <div class="field">
@@ -288,7 +341,7 @@ $action = $isNew ? url('/admin/properties/new') : url('/admin/properties/' . $pr
           <?= csrf_field() ?>
           <button class="btn btn--danger" type="submit">Delete permanently</button>
         </form>
-        <span class="text-small text-soft">Enquiries about this property are kept and will show as "General".</span>
+        <span class="text-small text-soft">Inquiries about this property are kept and will show as "General".</span>
       <?php else: ?>
         <span class="text-small text-soft">Archive it first if you want the option to delete it.</span>
       <?php endif; ?>
