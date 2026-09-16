@@ -142,13 +142,20 @@ function migrate(PDO $pdo): void
     ");
 
     $pdo->exec("
-        CREATE TABLE IF NOT EXISTS pricing_items (
-            id          INTEGER PRIMARY KEY AUTOINCREMENT,
-            title       TEXT NOT NULL,
-            amount      TEXT NOT NULL DEFAULT '',
-            description TEXT NOT NULL DEFAULT '',
-            sort_order  INTEGER NOT NULL DEFAULT 0,
-            is_active   INTEGER NOT NULL DEFAULT 1
+        CREATE TABLE IF NOT EXISTS plans (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            name            TEXT NOT NULL,
+            subtitle        TEXT NOT NULL DEFAULT '',
+            description     TEXT NOT NULL DEFAULT '',
+            price_value     TEXT NOT NULL DEFAULT '',
+            price_note      TEXT NOT NULL DEFAULT '',
+            fee_lines       TEXT NOT NULL DEFAULT '',
+            bullets         TEXT NOT NULL DEFAULT '',
+            highlight_label TEXT NOT NULL DEFAULT '',
+            cta_label       TEXT NOT NULL DEFAULT '',
+            footnote        TEXT NOT NULL DEFAULT '',
+            sort_order      INTEGER NOT NULL DEFAULT 0,
+            is_active       INTEGER NOT NULL DEFAULT 1
         )
     ");
 
@@ -230,16 +237,16 @@ function seed(PDO $pdo): void
         'site_name'          => 'Hanu Property Management',
         'site_tagline'       => 'Professional. Reliable. Personalized.',
         'logo_file'          => '',
-        'contact_email'      => 'info@hanupropertymanagement.com',
-        'contact_phone'      => '',
-        'contact_address'    => '',
+        'contact_email'      => 'hanupmt@gmail.com',
+        'contact_phone'      => '',   // deliberately blank: client does not want a phone number published
+        'contact_address'    => "2107 Goldfinch Boulevard, #1007\nPrinceton, NJ 08540",
         'office_hours'       => "Mon–Fri: 9:00am – 5:30pm\nSat: 10:00am – 2:00pm\nSun: Closed",
         'hero_heading'       => 'Find your next home',
-        'hero_subheading'    => 'A carefully managed portfolio of rental homes across New Jersey, looked after by people who answer the phone themselves.',
+        'hero_subheading'    => 'Rental homes across New Jersey, and full-service management for the owners who trust us with them.',
         'hero_image'         => '',
         'home_intro_heading' => 'Property management done properly',
-        'home_intro_body'    => "We manage every property on this site ourselves. That means no call center, no chain of agents, and a maintenance request that reaches the person who can actually authorize it.\n\nEvery home is rented with a written lease, a security deposit handled the way New Jersey requires, and a named contact you can reach directly.",
-        'pricing_intro'      => 'No hidden charges. Everything you will be asked to pay, listed in one place.',
+        'home_intro_body'    => "We manage every property on this site ourselves. That means no call center, no chain of agents, and a maintenance request that reaches the person who can actually authorize it.\n\nWe protect your investment and handle the details so you can enjoy peace of mind.",
+        'pricing_intro'      => 'Straightforward plans. No hidden fees. Exceptional management.',
         'contact_intro'      => 'Call, email, or send us a message and we will come back to you within one business day.',
         'map_embed'          => '',
         'footer_note'        => 'Professional. Reliable. Personalized.',
@@ -248,6 +255,8 @@ function seed(PDO $pdo): void
         'rent_period_label'  => '/mo',
         'date_format'        => 'F j, Y',
         'default_state'      => 'NJ',
+        'owner_cta_heading'  => 'Own a rental property in New Jersey?',
+        'owner_cta_body'     => 'We handle marketing, screening, leases, inspections, maintenance and owner statements. Plans start at 5% of monthly rent.',
         'fair_housing_note'  => 'We are an equal housing opportunity provider. We do not discriminate on the basis of race, color, religion, sex, disability, familial status, national origin, or any other class protected by federal or New Jersey law.',
         'primary_color'     => '#062952',
         'theme_accent'       => '#cd9a3a',
@@ -269,11 +278,11 @@ function seed(PDO $pdo): void
          . "We keep things straightforward. One point of contact, a written lease, a security deposit handled by the book, and maintenance requests that reach someone who can authorize the work.\n\n"
          . "This page is placeholder text. Replace it with your own words from the admin area under Website text."],
 
-        ['fees-notes', 'How the money works',
-         "DRAFT — please replace this with your own wording before the site goes live.\n\n"
-         . "New Jersey sets rules on how much of a security deposit may be collected, how it must be held, and how quickly it must be returned with an itemized statement at the end of a lease. Those rules are specific and they change. Rather than state them here and risk getting them wrong, this section is left for you to fill in once your attorney or property manager has confirmed the current position.\n\n"
-         . "Things worth covering here: what an applicant pays up front and when, whether an application fee is refundable, how you handle a security deposit and when it comes back, and what happens to a holding payment if an application is withdrawn.\n\n"
-         . "Clear this text entirely and the whole section disappears from the fees page."],
+        ['fees-notes', 'Notes and conditions',
+         "* Tenant placement means a qualified tenant has been approved and a lease agreement has been fully executed.\n\n"
+         . "** Waived only if you end management services due to dissatisfaction with our performance or level of service.\n\n"
+         . "Certificate of Occupancy: a valid Certificate of Occupancy is required and incurs an additional fee of $150 for new applications or renewals. This requirement applies to most counties in New Jersey.\n\n"
+         . "Marketing fee includes: MLS listing, tenant screening, and creating the lease. Tenant-side agent charge is an additional half month's rent (negotiable)."],
 
         ['disclosures', 'Disclosures',
          "DRAFT — this page is a checklist of prompts, not finished legal text. Have it reviewed before the site goes live, then rewrite it in your own words.\n\n"
@@ -302,27 +311,83 @@ function seed(PDO $pdo): void
         $stmt->execute([$p[0], $p[1], $p[2], $now]);
     }
 
-    // Fee rows. Every amount is a placeholder on purpose: the owner sets these
-    // from the admin once they have been checked.
-    $pricing = [
-        ['Application fee', 'SET YOUR AMOUNT',
-         'Charged per adult applicant to run a credit and background check. Replace this amount and description with your own.', 1],
-        ['Security deposit', 'CONFIRM BEFORE PUBLISHING',
-         'New Jersey limits how much may be collected and sets rules on how it is held and returned. Confirm the current position, then state your figure here.', 2],
-        ['First month’s rent', 'As advertised',
-         'Payable in cleared funds before keys are released.', 3],
-        ['Pet deposit or pet rent', 'IF YOU ACCEPT PETS',
-         'Delete this row if you do not accept pets, or set your amount. Note that assistance animals are not pets and cannot be charged for.', 4],
-        ['Late fee', 'PER YOUR LEASE',
-         'Whatever your lease provides. Some New Jersey tenants are entitled to a grace period before a late fee applies — confirm this before publishing a figure.', 5],
-        ['Lost keys or lock change', 'Cost of replacement',
-         'Charged at the actual cost of replacing the key or lock, evidenced by a receipt.', 6],
-        ['Lease change at your request', 'SET YOUR AMOUNT',
-         'For example adding or removing a named tenant part-way through a fixed term.', 7],
+    // Management plans, taken from the pricing page the client supplied.
+    // Everything here is editable from the admin under Pricing.
+    $includes = [
+        'Owner portal access',
+        'Monthly owner statements',
+        'ACH owner payments',
+        'Pre-onboarding inspection',
+        'Move-out inspection',
+        'Home maintenance support',
+        'Lease renewal coordination',
+        'HOA compliance',
+        '1099 and year-end statements',
     ];
-    $stmt = $pdo->prepare('INSERT INTO pricing_items (title, amount, description, sort_order, is_active) VALUES (?, ?, ?, ?, 1)');
-    foreach ($pricing as $p) {
-        $stmt->execute($p);
+    $stmt = $pdo->prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
+    $stmt->execute(['plan_includes_heading', 'Every plan includes']);
+    $stmt->execute(['plan_includes', implode("\n", $includes)]);
+
+    $plans = [
+        [
+            'name'        => 'Core Management Plan',
+            'subtitle'    => 'For 1–3 Properties',
+            'description' => 'Perfect for owners with one to three rental properties.',
+            'price_value' => '5%',
+            'price_note'  => "of monthly rent\nor $100 minimum",
+            'fee_lines'   => "Marketing Fee | $600\n"
+                           . "Owner-Requested Inspection | $100\n"
+                           . "Eviction Assistance | $500\n"
+                           . "Withdrawal During Active Marketing | $300\n"
+                           . "Withdrawal After Tenant Placement* | $0**",
+            'bullets'     => '',
+            'highlight_label' => '',
+            'cta_label'   => 'Ask about this plan',
+            'footnote'    => '',
+            'sort_order'  => 1,
+        ],
+        [
+            'name'        => 'Portfolio Preferred Plan',
+            'subtitle'    => 'For 4+ Properties',
+            'description' => 'Preferred pricing and enhanced value for growing rental portfolios.',
+            'price_value' => '4%',
+            'price_note'  => "of monthly rent\nor $80 minimum",
+            'fee_lines'   => "Marketing Fee | $500\n"
+                           . "Owner-Requested Inspection | $100\n"
+                           . "Eviction Assistance | $500\n"
+                           . "Withdrawal During Active Marketing | $200\n"
+                           . "Withdrawal After Tenant Placement* | $0**",
+            'bullets'     => '',
+            'highlight_label' => 'Most popular',
+            'cta_label'   => 'Ask about this plan',
+            'footnote'    => '',
+            'sort_order'  => 2,
+        ],
+        [
+            'name'        => 'Custom Management Plan',
+            'subtitle'    => 'Designed Around You',
+            'description' => 'You choose the services. You set the price.',
+            'price_value' => 'Custom pricing',
+            'price_note'  => 'Tailored to your properties and management goals.',
+            'fee_lines'   => '',
+            'bullets'     => "Flexible pricing options\n"
+                           . "Services customized to your needs\n"
+                           . "Ideal for large portfolios\n"
+                           . "Dedicated support every step of the way",
+            'highlight_label' => '',
+            'cta_label'   => 'Request a custom quote',
+            'footnote'    => '',
+            'sort_order'  => 3,
+        ],
+    ];
+
+    $sql = 'INSERT INTO plans (name, subtitle, description, price_value, price_note, fee_lines,
+                               bullets, highlight_label, cta_label, footnote, sort_order, is_active)
+            VALUES (:name, :subtitle, :description, :price_value, :price_note, :fee_lines,
+                    :bullets, :highlight_label, :cta_label, :footnote, :sort_order, 1)';
+    $stmt = $pdo->prepare($sql);
+    foreach ($plans as $plan) {
+        $stmt->execute($plan);
     }
 
     seed_properties($pdo);

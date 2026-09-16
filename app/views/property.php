@@ -201,8 +201,13 @@ $cover    = $images[0] ?? null;
           <hr>
 
           <p class="text-small text-soft mb-0">
-            Prefer to talk? Call <strong><?= e(setting('contact_phone')) ?></strong>
-            and quote <strong><?= e($property['reference']) ?></strong>.
+            <?php if (setting('contact_phone') !== ''): ?>
+              Prefer to talk? Call <strong><?= e(setting('contact_phone')) ?></strong>
+              and quote <strong><?= e($property['reference']) ?></strong>.
+            <?php else: ?>
+              Quote reference <strong><?= e($property['reference']) ?></strong> in any message
+              and we will know exactly which home you mean.
+            <?php endif; ?>
           </p>
         </div>
       </aside>

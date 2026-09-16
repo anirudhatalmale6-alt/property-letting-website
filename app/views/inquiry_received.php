@@ -10,9 +10,11 @@
       Your inquiry has reached us and we will come back to you within one business day.
       A confirmation has been sent to the email address you gave, with your reference number on it.
     </p>
-    <p class="text-soft">
-      If it is urgent, call us on <strong><?= e(setting('contact_phone')) ?></strong>.
-    </p>
+    <?php if (setting('contact_phone') !== ''): ?>
+      <p class="text-soft">
+        If it is urgent, call us on <strong><?= e(setting('contact_phone')) ?></strong>.
+      </p>
+    <?php endif; ?>
     <p class="mt-32">
       <a class="btn" href="<?= e(url('/properties')) ?>">Keep browsing properties</a>
       <a class="btn btn--ghost" href="<?= e(url('/')) ?>">Back to the home page</a>

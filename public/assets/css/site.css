@@ -524,3 +524,103 @@ select {
 @media print {
   .site-header, .site-footer, .nav-toggle, .aside-card form { display: none; }
 }
+
+/* --- Management plans ------------------------------------------------------ */
+
+.plan-grid {
+  display: grid; gap: 26px; align-items: start;
+  grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+}
+
+.plan {
+  position: relative; display: flex; flex-direction: column; height: 100%;
+  background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 30px 28px 28px;
+}
+.plan--featured {
+  border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), var(--shadow);
+}
+
+.plan__ribbon {
+  position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+  background: var(--accent); color: #17222e; border-radius: 100px;
+  font-size: .74rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  padding: 5px 16px; white-space: nowrap;
+}
+
+.plan__name { font-size: 1.3rem; margin-bottom: .2em; }
+.plan__subtitle {
+  font-size: .95rem; font-weight: 600; color: var(--primary); margin-bottom: .8em;
+}
+.plan--featured .plan__subtitle { color: var(--accent-ink); }
+.plan__description { font-size: .95rem; color: var(--ink-soft); margin-bottom: 0; }
+
+.plan__price {
+  display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap;
+  margin: 24px 0; padding-top: 22px; border-top: 1px solid var(--line-soft);
+}
+.plan__price-value {
+  font-family: var(--font-head); font-size: 2.9rem; line-height: 1;
+  font-weight: 600; color: var(--primary);
+}
+.plan--featured .plan__price-value { color: var(--accent-ink); }
+.plan__price-note { display: flex; flex-direction: column; font-size: .92rem; color: var(--ink-soft); }
+
+/* A long label such as "Custom pricing" is a phrase, not a figure: at the
+   headline size it wraps to two lines and towers over the "5%" beside it. */
+.plan__price-value { overflow-wrap: anywhere; }
+.plan__price-value--phrase { font-size: 1.55rem; line-height: 1.2; }
+
+.plan__fees { margin: 0 0 24px; }
+.plan__fee {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 16px;
+  padding: 9px 0; border-bottom: 1px solid var(--line-soft); font-size: .92rem;
+}
+.plan__fee:last-child { border-bottom: 0; }
+.plan__fee dt { color: var(--ink-soft); margin: 0; }
+.plan__fee dd { margin: 0; font-weight: 600; white-space: nowrap; }
+
+.plan__bullets { list-style: none; margin: 0 0 24px; padding: 0; display: grid; gap: 10px; }
+.plan__bullets li { position: relative; padding-left: 26px; font-size: .93rem; color: var(--ink-soft); }
+.plan__bullets li::before {
+  content: "✓"; position: absolute; left: 2px; top: 0;
+  color: var(--accent-ink); font-weight: 700;
+}
+
+.plan__cta { margin-top: auto; text-align: center; }
+
+.includes {
+  margin-top: 46px; padding: 34px 32px;
+  background: var(--paper-warm); border: 1px solid var(--line); border-radius: var(--radius);
+}
+.includes__heading {
+  font-family: var(--font-body); font-size: .82rem; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .11em; color: var(--ink-soft);
+  margin-bottom: 22px;
+}
+.includes__grid {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; gap: 14px 28px;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+.includes__grid li { position: relative; padding-left: 26px; font-size: .95rem; }
+.includes__grid li::before {
+  content: "✓"; position: absolute; left: 0; top: 0;
+  color: var(--accent-ink); font-weight: 700;
+}
+
+@media (max-width: 560px) {
+  .plan { padding: 28px 20px 24px; }
+  .includes { padding: 26px 20px; }
+}
+
+/* --- Owner call to action -------------------------------------------------- */
+
+.owner-cta {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 24px; padding: 34px 36px;
+  background: var(--paper-warm); border: 1px solid var(--line); border-radius: var(--radius);
+}
+.owner-cta > div:first-child { flex: 1 1 380px; }
+.owner-cta__actions { display: flex; flex-wrap: wrap; gap: 10px; }
+@media (max-width: 560px) { .owner-cta { padding: 26px 20px; } }

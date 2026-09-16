@@ -55,7 +55,13 @@ $map = setting('map_embed');
 
           <div class="field<?= isset($errors['message']) ? ' field--invalid' : '' ?>">
             <label for="message">How can we help?</label>
-            <textarea id="message" name="message" required><?= e((string)old('message')) ?></textarea>
+            <?php
+              $prefill = (string)old('message');
+              if ($prefill === '' && ($plan ?? '') !== '') {
+                  $prefill = 'I would like to know more about the ' . $plan . '.';
+              }
+            ?>
+            <textarea id="message" name="message" required><?= e($prefill) ?></textarea>
             <?php if (isset($errors['message'])): ?><p class="field__error"><?= e($errors['message']) ?></p><?php endif; ?>
           </div>
 

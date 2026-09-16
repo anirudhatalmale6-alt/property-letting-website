@@ -44,7 +44,7 @@ $newCount = $counts['new'] ?? 0;
       Inquiries
       <?php if ($newCount > 0): ?><span class="pill"><?= (int)$newCount ?></span><?php endif; ?>
     </a>
-    <a class="adm-nav__link<?= nav_active('/admin/pricing') ?>" href="<?= e(url('/admin/pricing')) ?>">Fees and charges</a>
+    <a class="adm-nav__link<?= nav_active('/admin/pricing') ?>" href="<?= e(url('/admin/pricing')) ?>">Pricing</a>
     <a class="adm-nav__link<?= nav_active('/admin/pages') ?>" href="<?= e(url('/admin/pages')) ?>">Website text</a>
 
     <p class="adm-nav__heading">Setup</p>

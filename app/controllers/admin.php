@@ -477,8 +477,8 @@ function admin_pricing(): void
     require_admin();
 
     view('admin/pricing', [
-        'title' => 'Fees and charges',
-        'items' => db()->query('SELECT * FROM pricing_items ORDER BY sort_order, id')->fetchAll(),
+        'title' => 'Pricing',
+        'plans' => db()->query('SELECT * FROM plans ORDER BY sort_order, id')->fetchAll(),
         'intro' => setting('pricing_intro'),
     ], 'admin/layout');
 }
@@ -489,41 +489,71 @@ function admin_pricing_save(): void
     csrf_check();
 
     setting_save('pricing_intro', input('pricing_intro'));
+    setting_save('plan_includes_heading', input('plan_includes_heading'));
+    setting_save('plan_includes', implode("\n", lines(input('plan_includes'))));
 
-    // Existing rows: update, or delete when the title has been cleared.
-    $titles = $_POST['title'] ?? [];
-    if (is_array($titles)) {
-        $update = db()->prepare('UPDATE pricing_items SET title = ?, amount = ?, description = ?, sort_order = ?, is_active = ? WHERE id = ?');
-        $delete = db()->prepare('DELETE FROM pricing_items WHERE id = ?');
+    // Existing plans: update, or delete when the name has been cleared.
+    $names = $_POST['name'] ?? [];
+    if (is_array($names)) {
+        $update = db()->prepare(
+            'UPDATE plans SET name = :name, subtitle = :subtitle, description = :description,
+                              price_value = :price_value, price_note = :price_note,
+                              fee_lines = :fee_lines, bullets = :bullets,
+                              highlight_label = :highlight_label, cta_label = :cta_label,
+                              sort_order = :sort_order, is_active = :is_active
+             WHERE id = :id'
+        );
+        $delete = db()->prepare('DELETE FROM plans WHERE id = ?');
 
-        foreach ($titles as $rowId => $title) {
+        foreach ($names as $rowId => $name) {
             $rowId = (int)$rowId;
-            $title = trim((string)$title);
+            $name  = trim((string)$name);
 
-            if ($title === '') {
+            if ($name === '') {
                 $delete->execute([$rowId]);
                 continue;
             }
+
             $update->execute([
-                $title,
-                trim((string)($_POST['amount'][$rowId] ?? '')),
-                trim((string)($_POST['description'][$rowId] ?? '')),
-                (int)($_POST['sort_order'][$rowId] ?? 0),
-                isset($_POST['is_active'][$rowId]) ? 1 : 0,
-                $rowId,
+                ':name'            => $name,
+                ':subtitle'        => trim((string)($_POST['subtitle'][$rowId] ?? '')),
+                ':description'     => trim((string)($_POST['description'][$rowId] ?? '')),
+                ':price_value'     => trim((string)($_POST['price_value'][$rowId] ?? '')),
+                ':price_note'      => implode("\n", lines((string)($_POST['price_note'][$rowId] ?? ''))),
+                ':fee_lines'       => implode("\n", lines((string)($_POST['fee_lines'][$rowId] ?? ''))),
+                ':bullets'         => implode("\n", lines((string)($_POST['bullets'][$rowId] ?? ''))),
+                ':highlight_label' => trim((string)($_POST['highlight_label'][$rowId] ?? '')),
+                ':cta_label'       => trim((string)($_POST['cta_label'][$rowId] ?? '')),
+                ':sort_order'      => (int)($_POST['sort_order'][$rowId] ?? 0),
+                ':is_active'       => isset($_POST['is_active'][$rowId]) ? 1 : 0,
+                ':id'              => $rowId,
             ]);
         }
     }
 
-    // The blank row at the bottom of the form adds a new charge.
-    $newTitle = input('new_title');
-    if ($newTitle !== '') {
-        $next = (int)db()->query('SELECT COALESCE(MAX(sort_order), 0) + 1 FROM pricing_items')->fetchColumn();
-        db()->prepare('INSERT INTO pricing_items (title, amount, description, sort_order, is_active) VALUES (?, ?, ?, ?, 1)')
-            ->execute([$newTitle, input('new_amount'), input('new_description'), $next]);
+    // The blank block at the bottom of the form adds a plan.
+    if (input('new_name') !== '') {
+        $next = (int)db()->query('SELECT COALESCE(MAX(sort_order), 0) + 1 FROM plans')->fetchColumn();
+        db()->prepare(
+            'INSERT INTO plans (name, subtitle, description, price_value, price_note,
+                                fee_lines, bullets, highlight_label, cta_label, footnote,
+                                sort_order, is_active)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, \'\', ?, 1)'
+        )->execute([
+            input('new_name'),
+            input('new_subtitle'),
+            input('new_description'),
+            input('new_price_value'),
+            implode("\n", lines(input('new_price_note'))),
+            implode("\n", lines(input('new_fee_lines'))),
+            implode("\n", lines(input('new_bullets'))),
+            input('new_highlight_label'),
+            input('new_cta_label') ?: 'Get in touch',
+            $next,
+        ]);
     }
 
-    flash('success', 'Fees updated. The pricing page has been refreshed.');
+    flash('success', 'Pricing updated. The page has been refreshed.');
     redirect('/admin/pricing');
 }
 
@@ -603,6 +633,8 @@ function admin_editable_settings(): array
         'rent_period_label'  => ['Rent period wording', 'text', 'Shown after each rent figure. "/mo", "per month" or "pcm".'],
         'date_format'        => ['Date format', 'text', 'PHP date format. "F j, Y" gives October 1, 2026. "j F Y" gives 1 October 2026.'],
         'default_state'      => ['Default state', 'text', 'Pre-selected on the property form, so you are not picking it every time. Two letters, such as NJ.'],
+        'owner_cta_heading'  => ['Owner section heading', 'text', 'The block on the home page aimed at property owners. Clear it to remove the block.'],
+        'owner_cta_body'     => ['Owner section text', 'textarea', ''],
         'fair_housing_note'  => ['Fair housing statement', 'textarea', 'Shown in the footer of every page. Clear it to remove the line entirely.'],
         'footer_note'        => ['Footer note', 'textarea', 'The small print at the very bottom of every page.'],
         'primary_color'     => ['Main color', 'color', 'Used for headings, buttons and links.'],

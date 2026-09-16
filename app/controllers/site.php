@@ -118,21 +118,25 @@ function site_property_inquiry(string $slug): void
 
 function site_pricing(): void
 {
-    $items = db()->query('SELECT * FROM pricing_items WHERE is_active = 1 ORDER BY sort_order, id')->fetchAll();
-
     view('pricing', [
-        'title' => 'Fees and charges',
-        'meta'  => 'A full list of the fees and charges that apply to a lease.',
-        'items' => $items,
+        'title' => 'Pricing',
+        'meta'  => 'Property management plans and pricing from ' . setting('site_name') . '.',
+        'plans' => db()->query('SELECT * FROM plans WHERE is_active = 1 ORDER BY sort_order, id')->fetchAll(),
     ]);
 }
 
 function site_contact(array $errors = []): void
 {
+    // Arriving from a plan's button pre-fills the message so the owner does not
+    // have to explain which plan they were looking at.
+    $plan = input('plan');
+    $planNames = array_column(db()->query('SELECT name FROM plans WHERE is_active = 1')->fetchAll(), 'name');
+
     view('contact', [
         'title'  => 'Contact us',
         'meta'   => 'Get in touch with ' . setting('site_name') . '.',
         'errors' => $errors,
+        'plan'   => in_array($plan, $planNames, true) ? $plan : '',
     ]);
 }
 
@@ -320,8 +324,8 @@ function store_and_notify_inquiry(array $data, ?array $property): void
          . "Your reference is {$enq['reference']}"
          . ($property ? ", and it relates to {$property['title']}." : '.') . "\n\n"
          . "There is no need to reply to this message — it is just confirmation that your inquiry arrived.\n\n"
-         . setting('site_name') . "\n"
-         . setting('contact_phone') . "\n";
+         . setting('site_name')
+         . (setting('contact_phone') !== '' ? "\n" . setting('contact_phone') : '') . "\n";
 
     send_mail($data['email'], 'We have received your inquiry (' . $enq['reference'] . ')', $ack, setting('contact_email'));
 }

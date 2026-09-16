@@ -47,7 +47,7 @@ $accent   = setting('theme_accent', '#c9873f');
     <nav class="site-nav" id="site-nav" aria-label="Main">
       <a class="site-nav__link<?= nav_active('/') ?>" href="<?= e(url('/')) ?>">Home</a>
       <a class="site-nav__link<?= nav_active('/properties') ?><?= nav_active('/property') ?>" href="<?= e(url('/properties')) ?>">Properties</a>
-      <a class="site-nav__link<?= nav_active('/pricing') ?>" href="<?= e(url('/pricing')) ?>">Fees</a>
+      <a class="site-nav__link<?= nav_active('/pricing') ?>" href="<?= e(url('/pricing')) ?>">Pricing</a>
       <a class="site-nav__link<?= nav_active('/about') ?>" href="<?= e(url('/about')) ?>">About</a>
       <a class="site-nav__link site-nav__link--cta<?= nav_active('/contact') ?>" href="<?= e(url('/contact')) ?>">Contact</a>
     </nav>
@@ -87,7 +87,7 @@ $accent   = setting('theme_accent', '#c9873f');
     <div class="site-footer__block">
       <h2 class="site-footer__heading">Pages</h2>
       <a href="<?= e(url('/properties')) ?>">Properties for rent</a>
-      <a href="<?= e(url('/pricing')) ?>">Fees and charges</a>
+      <a href="<?= e(url('/pricing')) ?>">Pricing</a>
       <a href="<?= e(url('/disclosures')) ?>">Disclosures</a>
       <a href="<?= e(url('/privacy')) ?>">Privacy policy</a>
       <a href="<?= e(url('/terms')) ?>">Terms of use</a>

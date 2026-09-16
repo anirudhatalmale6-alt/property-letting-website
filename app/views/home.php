@@ -101,30 +101,44 @@
             <div class="stat__label">Properties currently listed</div>
           </div>
           <div class="stat">
-            <div class="stat__value"><?= e(money(0)) ?></div>
-            <div class="stat__label">Tenant referencing and admin fees</div>
-          </div>
-          <div class="stat">
             <div class="stat__value">1 day</div>
             <div class="stat__label">We reply to inquiries within one business day</div>
           </div>
         </div>
 
         <p class="text-small text-soft mt-32">
-          Every fee you could be asked to pay is set out in full on our
-          <a href="<?= e(url('/pricing')) ?>">fees page</a>.
+          Our management plans and everything they include are set out in full on our
+          <a href="<?= e(url('/pricing')) ?>">pricing page</a>.
         </p>
       </div>
     </div>
   </div>
 </section>
 
+<?php if (setting('owner_cta_heading') !== ''): ?>
 <section class="section">
+  <div class="wrap">
+    <div class="owner-cta">
+      <div>
+        <h2 class="mt-0"><?= e(setting('owner_cta_heading')) ?></h2>
+        <p class="text-soft mb-0"><?= e(setting('owner_cta_body')) ?></p>
+      </div>
+      <div class="owner-cta__actions">
+        <a class="btn" href="<?= e(url('/pricing')) ?>">See our plans</a>
+        <a class="btn btn--ghost" href="<?= e(url('/contact')) ?>">Talk to us</a>
+      </div>
+    </div>
+  </div>
+</section>
+<?php endif; ?>
+
+<section class="section section--tint">
   <div class="wrap" style="text-align: center; max-width: 660px;">
     <h2>Seen something you like?</h2>
     <p class="text-soft">
-      Send us an inquiry about any property and we will come back to you within one business day —
-      or call us on <?= e(setting('contact_phone')) ?> if you would rather talk it through.
+      Send us an inquiry about any property and we will come back to you within one business day<?php
+        if (setting('contact_phone') !== ''): ?> — or call us on <?= e(setting('contact_phone')) ?>
+        if you would rather talk it through<?php endif; ?>.
     </p>
     <p class="mt-24">
       <a class="btn" href="<?= e(url('/properties')) ?>">Browse properties</a>

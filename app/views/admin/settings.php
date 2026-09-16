@@ -4,7 +4,8 @@
 // Grouped so the screen reads as a few short sections rather than one long form.
 $groups = [
     'Your business'   => ['site_name', 'site_tagline'],
-    'Home page'       => ['hero_heading', 'hero_subheading', 'home_intro_heading', 'home_intro_body'],
+    'Home page'       => ['hero_heading', 'hero_subheading', 'home_intro_heading', 'home_intro_body',
+                          'owner_cta_heading', 'owner_cta_body'],
     'Contact details' => ['contact_email', 'contact_phone', 'contact_address', 'office_hours', 'contact_intro', 'map_embed'],
     'Inquiries'       => ['inquiry_notify_email'],
     'Prices and formats' => ['currency_symbol', 'rent_period_label', 'date_format', 'default_state'],
